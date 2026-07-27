@@ -1,0 +1,17 @@
+# Godot
+.godot/
+*.translation
+Godot.app/
+
+# Exports
+*.apk
+*.aab
+*.ipa
+*.exe
+*.dmg
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
