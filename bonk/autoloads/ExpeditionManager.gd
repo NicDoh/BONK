@@ -167,8 +167,25 @@ func _get_monster_tick_interval() -> float:
 		return 3.0
 	return clampf(3.0 - (current_monster.speed * 0.05), 0.5, 3.0)
 
+func calculate_offline_kills(elapsed: float) -> int:
+	if not current_monster:
+		return 0
+	var avg_damage := maxi(1, CharacterManager.get_effective_stat("strength") - current_monster.defense / 2)
+	var ticks_per_kill := ceili(float(current_monster.hp) / float(avg_damage))
+	var time_per_kill := ticks_per_kill * _get_player_tick_interval()
+	return int(elapsed / time_per_kill)
+
 func serialize() -> Dictionary:
 	return {
 		"active": active,
 		"zone_id": current_zone_id,
+		"monster_path": current_monster.resource_path if current_monster else "",
 	}
+
+func deserialize(data: Dictionary) -> void:
+	current_zone_id = data.get("zone_id", "")
+	var monster_path: String = data.get("monster_path", "")
+	if monster_path != "":
+		current_monster = load(monster_path) as MonsterData
+		_monster_hp = current_monster.hp
+	active = data.get("active", false) and current_monster != null

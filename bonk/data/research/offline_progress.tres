@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ResearchData" load_steps=3 format=3 uid="uid://bgat2eq4o2as4"]
+
+[ext_resource type="Script" uid="uid://dc4e8e5wbj6mj" path="res://resources/CraftingIngredient.gd" id="1_d7uva"]
+[ext_resource type="Script" uid="uid://ct603woaakjmt" path="res://resources/ResearchData.gd" id="2_d62or"]
+
+[resource]
+script = ExtResource("2_d62or")
+id = "offline_progress"
+title = "Offline Progress"
+description = "The tribe continues working while you sleep."
+category = "expedition"
+duration_seconds = 10.0
+unlocks = Array[String](["offline_progress"])

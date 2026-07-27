@@ -4,10 +4,12 @@ const SAVE_PATH := "user://save.json"
 
 func save() -> void:
 	var data := {
+		"timestamp": Time.get_unix_time_from_system(),
 		"character": CharacterManager.serialize(),
 		"inventory": InventoryManager.serialize(),
 		"expedition": ExpeditionManager.serialize(),
 		"city": CityManager.serialize(),
+		"research": ResearchManager.serialize(),
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
@@ -33,6 +35,12 @@ func load_save() -> void:
 		InventoryManager.deserialize(data["inventory"])
 	if data.has("city"):
 		CityManager.deserialize(data["city"])
+	if data.has("research"):
+		ResearchManager.deserialize(data["research"])
+	if data.has("expedition"):
+		ExpeditionManager.deserialize(data["expedition"])
+	if data.has("timestamp"):
+		GameManager.apply_offline_progress(data["timestamp"])
 
 func delete_save() -> void:
 	if FileAccess.file_exists(SAVE_PATH):

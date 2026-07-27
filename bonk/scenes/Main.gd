@@ -16,6 +16,8 @@ var craft_container: VBoxContainer
 
 var _recipes: Array[CraftingRecipe] = []
 var _building_label: Label
+var _research_container: VBoxContainer
+var _research_status_label: Label
 
 var _log_lines: Array[String] = []
 const LOG_MAX := 6
@@ -124,6 +126,23 @@ func _ready() -> void:
 	inner.add_child(HSeparator.new())
 	_refresh_buildings()
 
+	# Thinkery
+	var thinkery_title := Label.new()
+	thinkery_title.text = "Thinkery"
+	thinkery_title.add_theme_font_size_override("font_size", 16)
+	inner.add_child(thinkery_title)
+
+	_research_status_label = Label.new()
+	_research_status_label.add_theme_font_size_override("font_size", 12)
+	inner.add_child(_research_status_label)
+
+	_research_container = VBoxContainer.new()
+	_research_container.add_theme_constant_override("separation", 6)
+	inner.add_child(_research_container)
+
+	inner.add_child(HSeparator.new())
+	_refresh_research_ui()
+
 	# Crafting
 	var craft_title := Label.new()
 	craft_title.text = "Bonkery"
@@ -174,13 +193,31 @@ func _ready() -> void:
 	EventBus.item_removed.connect(func(_i, _q): _refresh_inventory(); _refresh_craft_ui())
 	EventBus.item_crafted.connect(func(_r, _i): _refresh_inventory(); _refresh_gear(); _refresh_craft_ui())
 	EventBus.building_upgrade_completed.connect(func(_b, _l): _refresh_buildings(); _refresh_craft_ui())
+	EventBus.research_completed.connect(func(_r): _refresh_research_ui(); _log("[color=cyan]Research complete![/color]"))
+	EventBus.offline_progress_applied.connect(_on_offline_progress)
+	EventBus.content_unlocked.connect(func(id): _log("[color=cyan]Unlocked: %s[/color]" % id))
 
 	_refresh_player_hp()
+
+	if not GameManager.pending_offline_summary.is_empty():
+		var s := GameManager.pending_offline_summary
+		_on_offline_progress(s["elapsed"], s)
+		GameManager.pending_offline_summary = {}
+
+	if ExpeditionManager.active and ExpeditionManager.current_monster:
+		var monster := ExpeditionManager.current_monster
+		monster_name_label.text = monster.name
+		monster_hp_bar.max_value = monster.hp
+		monster_hp_bar.value = ExpeditionManager._monster_hp
+		action_button.text = "Recall"
 
 func _process(_delta: float) -> void:
 	if ExpeditionManager.active:
 		_refresh_player_hp()
 		_refresh_monster_hp()
+	if ResearchManager.active_research_id != "":
+		var secs := ResearchManager.time_remaining()
+		_research_status_label.text = "Researching: %s  (%.0fs left)" % [ResearchManager.active_research_id, secs]
 
 func _on_action_pressed() -> void:
 	if ExpeditionManager.active:
@@ -273,6 +310,47 @@ func _on_upgrade_bonkery() -> void:
 		_refresh_buildings()
 	else:
 		_log("[color=gray]Cannot upgrade Bonkery.[/color]")
+
+func _refresh_research_ui() -> void:
+	for child in _research_container.get_children():
+		child.queue_free()
+
+	if ResearchManager.active_research_id != "":
+		var secs := ResearchManager.time_remaining()
+		_research_status_label.text = "Researching: %s  (%.0fs left)" % [ResearchManager.active_research_id, secs]
+	else:
+		_research_status_label.text = "Idle"
+
+	var all := ResourceRegistry.get_all_research()
+	var available := ResearchManager.get_available(all)
+	for data in available:
+		var row := HBoxContainer.new()
+		var label := Label.new()
+		label.text = "%s  (%ds)" % [data.title, int(data.duration_seconds)]
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.add_theme_font_size_override("font_size", 12)
+		row.add_child(label)
+		var btn := Button.new()
+		btn.text = "Research"
+		btn.disabled = ResearchManager.active_research_id != ""
+		btn.pressed.connect(_on_research_pressed.bind(data))
+		row.add_child(btn)
+		_research_container.add_child(row)
+
+	for data in all:
+		if not ResearchManager.is_completed(data.id):
+			continue
+		var done_label := Label.new()
+		done_label.text = "✓ %s" % data.title
+		done_label.add_theme_font_size_override("font_size", 12)
+		_research_container.add_child(done_label)
+
+func _on_research_pressed(data: ResearchData) -> void:
+	if ResearchManager.start(data):
+		_log("[color=yellow]Started: %s[/color]" % data.title)
+		_refresh_research_ui()
+	else:
+		_log("[color=gray]Cannot start research.[/color]")
 
 func _load_recipes() -> void:
 	var dir := DirAccess.open("res://data/recipes/")
@@ -378,6 +456,14 @@ func _rebuild_equip_buttons() -> void:
 func _on_equip_pressed(gear: GearData) -> void:
 	CharacterManager.equip(gear)
 	_refresh_gear()
+	_refresh_stats()
+
+func _on_offline_progress(elapsed: float, summary: Dictionary) -> void:
+	var mins := int(elapsed / 60)
+	_log("[color=gold]--- Offline: %dm, %d kills ---[/color]" % [mins, summary["kills"]])
+	for item_name in summary["drops"]:
+		_log("[color=gold]  %s x%d[/color]" % [item_name, summary["drops"][item_name]])
+	_refresh_inventory()
 	_refresh_stats()
 
 func _log(text: String) -> void:
