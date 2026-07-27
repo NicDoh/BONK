@@ -82,6 +82,12 @@ func equip(gear: GearData) -> void:
 		GearData.Slot.OFF_HAND:  equipped_off_hand = gear
 	recalculate_max_hp()
 
+func unequip(slot: GearData.Slot) -> void:
+	match slot:
+		GearData.Slot.MAIN_HAND: equipped_main_hand = null
+		GearData.Slot.OFF_HAND:  equipped_off_hand = null
+	recalculate_max_hp()
+
 func serialize() -> Dictionary:
 	return {
 		"stats": stats.duplicate(true),

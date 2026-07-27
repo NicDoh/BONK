@@ -101,6 +101,11 @@ func _ready() -> void:
 	_equip_container = VBoxContainer.new()
 	_equip_container.add_theme_constant_override("separation", 4)
 	inner.add_child(_equip_container)
+
+	_unequip_container = VBoxContainer.new()
+	_unequip_container.add_theme_constant_override("separation", 4)
+	inner.add_child(_unequip_container)
+
 	_refresh_gear()
 
 	inner.add_child(HSeparator.new())
@@ -281,6 +286,25 @@ func _refresh_gear() -> void:
 	lines.append("  Main hand: %s" % (main.name if main else "none"))
 	lines.append("  Off hand:  %s" % (off.name if off else "none"))
 	gear_label.text = "\n".join(lines)
+	if _unequip_container:
+		_rebuild_unequip_buttons(_unequip_container)
+	_rebuild_equip_buttons()
+
+func _rebuild_unequip_buttons(container: VBoxContainer) -> void:
+	for child in container.get_children():
+		child.queue_free()
+	var main := CharacterManager.equipped_main_hand
+	var off := CharacterManager.equipped_off_hand
+	if main:
+		var btn := Button.new()
+		btn.text = "Unequip %s" % main.name
+		btn.pressed.connect(func(): CharacterManager.unequip(GearData.Slot.MAIN_HAND); _refresh_gear(); _refresh_stats())
+		container.add_child(btn)
+	if off:
+		var btn := Button.new()
+		btn.text = "Unequip %s" % off.name
+		btn.pressed.connect(func(): CharacterManager.unequip(GearData.Slot.OFF_HAND); _refresh_gear(); _refresh_stats())
+		container.add_child(btn)
 
 func _refresh_inventory() -> void:
 	var all := InventoryManager.get_all_items()
@@ -300,6 +324,7 @@ func _refresh_inventory() -> void:
 	_rebuild_equip_buttons()
 
 var _equip_container: VBoxContainer = null
+var _unequip_container: VBoxContainer = null
 
 func _rebuild_equip_buttons() -> void:
 	if _equip_container == null:
