@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BuildingData" load_steps=2 format=3 uid="uid://d0ooxxwogd1e6"]
+
+[ext_resource type="Script" uid="uid://bxyw47yjy7gt" path="res://resources/BuildingData.gd" id="1_3e46y"]
+
+[resource]
+script = ExtResource("1_3e46y")
+id = "bonkery"
+name = "Bonkery"
+max_level = 3
+upgrade_durations = Array[float]([10.0, 30.0, 60.0])

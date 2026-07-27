@@ -15,6 +15,7 @@ var gear_label: Label
 var craft_container: VBoxContainer
 
 var _recipes: Array[CraftingRecipe] = []
+var _building_label: Label
 
 var _log_lines: Array[String] = []
 const LOG_MAX := 6
@@ -110,6 +111,19 @@ func _ready() -> void:
 
 	inner.add_child(HSeparator.new())
 
+	# Buildings
+	_building_label = Label.new()
+	_building_label.add_theme_font_size_override("font_size", 12)
+	inner.add_child(_building_label)
+
+	var upgrade_btn := Button.new()
+	upgrade_btn.text = "Upgrade Bonkery"
+	upgrade_btn.pressed.connect(_on_upgrade_bonkery)
+	inner.add_child(upgrade_btn)
+
+	inner.add_child(HSeparator.new())
+	_refresh_buildings()
+
 	# Crafting
 	var craft_title := Label.new()
 	craft_title.text = "Bonkery"
@@ -159,6 +173,7 @@ func _ready() -> void:
 	EventBus.item_obtained.connect(func(_i, _q): _refresh_inventory(); _refresh_craft_ui())
 	EventBus.item_removed.connect(func(_i, _q): _refresh_inventory(); _refresh_craft_ui())
 	EventBus.item_crafted.connect(func(_r, _i): _refresh_inventory(); _refresh_gear(); _refresh_craft_ui())
+	EventBus.building_upgrade_completed.connect(func(_b, _l): _refresh_buildings(); _refresh_craft_ui())
 
 	_refresh_player_hp()
 
@@ -239,6 +254,25 @@ func _refresh_stats() -> void:
 		var needed := CharacterManager.xp_for_level(level + 1)
 		lines.append("%s: %d  (%.0f / %.0f xp)" % [stat.capitalize(), level, xp, needed])
 	stats_label.text = "\n".join(lines)
+
+func _refresh_buildings() -> void:
+	var level := CityManager.get_level("bonkery")
+	var upgrading := CityManager.is_upgrading("bonkery")
+	var text := "Bonkery: Level %d" % level
+	if upgrading:
+		text += "  (upgrading...)"
+	_building_label.text = text
+
+func _on_upgrade_bonkery() -> void:
+	var data := load("res://data/buildings/bonkery.tres") as BuildingData
+	if not data:
+		return
+	var cost: Array[CraftingIngredient] = []
+	if CityManager.start_upgrade("bonkery", data, cost):
+		_log("[color=lime]Bonkery upgrading![/color]")
+		_refresh_buildings()
+	else:
+		_log("[color=gray]Cannot upgrade Bonkery.[/color]")
 
 func _load_recipes() -> void:
 	var dir := DirAccess.open("res://data/recipes/")
