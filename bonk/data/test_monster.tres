@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MonsterData" load_steps=3 format=3 uid="uid://cs22aavpigkq8"]
+
+[ext_resource type="Script" uid="uid://bcbkorf3prq6t" path="res://resources/DropEntry.gd" id="1_30ph1"]
+[ext_resource type="Script" uid="uid://c37n5la3tyym0" path="res://resources/MonsterData.gd" id="2_cjb6j"]
+
+[resource]
+script = ExtResource("2_cjb6j")
+id = "test"
+name = "Test"
+hp = 5
+accuracy = 5
