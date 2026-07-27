@@ -4,70 +4,49 @@
 
 ---
 
-## FASE 0 — Godot Setup
+## FASE 0 — Godot Setup ✅
 *Mål: Et tomt men korrekt struktureret Godot-projekt klar til kode*
 
-- [ ] Opret Godot projekt i `/game/`
-- [ ] Opret mappestruktur (autoloads, resources, data, scenes, assets)
-- [ ] Skriv Resource-klasser
-  - [ ] ItemData.gd
-  - [ ] GearData.gd
-  - [ ] FragmentData.gd
-  - [ ] CraftingIngredient.gd
-  - [ ] CraftingRecipe.gd
-  - [ ] DropEntry.gd
-  - [ ] MonsterData.gd
-  - [ ] PetData.gd
-  - [ ] PetInstance.gd
-  - [ ] ResearchData.gd
-  - [ ] BuildingData.gd
-- [ ] Opret EventBus.gd med alle signals
-- [ ] Opret tomme Manager autoloads
-  - [ ] GameManager.gd
-  - [ ] SaveManager.gd
-  - [ ] CharacterManager.gd
-  - [ ] InventoryManager.gd
-  - [ ] ExpeditionManager.gd
-  - [ ] CityManager.gd
-  - [ ] ResearchManager.gd
-  - [ ] CollectionLogManager.gd
-  - [ ] PetManager.gd
-- [ ] Registrer alle autoloads i Project Settings
+- [x] Opret Godot projekt i `/bonk/`
+- [x] Opret mappestruktur (autoloads, resources, data, scenes, assets)
+- [x] Skriv Resource-klasser (ItemData, GearData, FragmentData, CraftingIngredient, CraftingRecipe, DropEntry, MonsterData, PetData, PetInstance, ResearchData, BuildingData)
+- [x] Opret EventBus.gd med alle signals
+- [x] Opret Manager autoloads (GameManager, SaveManager, CharacterManager, InventoryManager, ExpeditionManager, CityManager, ResearchManager, CollectionLogManager, PetManager, CraftingManager, ResourceRegistry)
+- [x] Registrer alle autoloads i Project Settings
 
 ---
 
-## FASE 1 — Kerneloop (MVP)
+## FASE 1 — Kerneloop (MVP) ✅
 *Mål: Send karakter ud, kæmp, få drops, se inventory. Intet mere.*
 
-- [ ] CharacterManager — stats og XP-beregning
-- [ ] InventoryManager — tilføj/fjern items
-- [ ] MonsterData — opret ét testmonster som .tres fil
-- [ ] ExpeditionManager — start og afslut expedition
-- [ ] Kamp-simulation — tick-system, hit/miss/block, skadeberegning
-- [ ] Drop-system — rul drops fra monster drop table
-- [ ] Stat XP — optjen XP fra kamp baseret på gear
-- [ ] Basic combat view — portræt, HP bars, floating damage tal
-- [ ] Basic expedition UI — vælg zone, send ud, recall
-- [ ] Basic inventory UI — vis items og mængder
-- [ ] Basic character UI — vis stats og levels
-- [ ] SaveManager — gem og load JSON
-- [ ] **Test: komplet kerneloop virker ende-til-ende**
+- [x] CharacterManager — stats og XP-beregning
+- [x] InventoryManager — tilføj/fjern items
+- [x] MonsterData — testmonster som .tres fil
+- [x] ExpeditionManager — start og afslut expedition
+- [x] Kamp-simulation — separate tick-timers per spiller/monster, hit/miss/block, skadeberegning
+- [x] Drop-system — rul drops fra monster drop table
+- [x] Stat XP — optjen XP fra kamp baseret på gear
+- [x] Basic combat UI — HP bars, kamplog, stats, inventory
+- [x] SaveManager — gem og load JSON
+- [x] **Test: komplet kerneloop virker ende-til-ende** ✅
 
 ---
 
-## FASE 2 — By og crafting
+## FASE 2 — By og crafting ✅
 *Mål: Brug dine drops til at bygge og crafte noget meningsfuldt*
 
-- [ ] CityManager — bygninger og levels
-- [ ] Forge UI — vis opskrifter, craft items
-- [ ] Crafting-system — direkte crafting virker
-- [ ] Gear equip-system — equip og udskift gear
-- [ ] Stat-formel komplet — gear_bonus + building_bonus indregnet
-- [ ] Damage types — weapon damage type påvirker kamp
-- [ ] Monster weakness/resistance — damage matrix virker
-- [ ] Basic Research Center — start research, vent, få unlock
-- [ ] Building upgrade-system — brug ressourcer + tid
-- [ ] **Test: craft bedre gear, mærk forskellen i kamp**
+- [x] CityManager — bygninger og levels
+- [x] Bonkery UI — vis opskrifter, craft items
+- [x] Crafting-system — direkte crafting virker
+- [x] Gear equip/unequip-system
+- [x] Stat-formel komplet — gear_bonus indregnet
+- [x] Damage types — weapon damage type påvirker kamp
+- [x] Monster weakness/resistance — damage matrix virker
+- [x] Thinkery (Research Center) — start research, vent, få unlock
+- [x] Building upgrade-system — ressourcer + tid
+- [x] ResourceRegistry — central itemlookup, ingen disk-scan ved load
+- [x] Offline progress — beregnes ved load hvis unlocked via Thinkery
+- [x] **Test: craft bedre gear, mærk forskellen i kamp** ✅
 
 ---
 
