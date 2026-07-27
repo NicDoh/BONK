@@ -12,7 +12,7 @@ Primitiv idle RPG til iOS og Android bygget i Godot 4. Runescape-inspireret foku
 ## Kerneloop
 ```
 Equip gear → vælg zone og mode → kamp i realtid (tick-baseret)
-→ drops + stat XP → brug drops i byen → stærkere karakter → nye zoner
+→ drops + stat XP → brug drops i tribe → stærkere karakter → nye zoner
 ```
 
 ## Karakter & Stats
@@ -33,14 +33,18 @@ Roam (altid) → Target Hunt → Boss Run → Bounded activities (alle via Resea
 - Alle inaktive pets giver passive bonusser simultant
 - Sjælde drops fra monstre — stor collection log-kategori
 
-## By-bygninger
-Forge · Research Center · Camp/Hub · Museum · Beast Den
-Watchtower · Trading Post · Warehouse · Ancestor's Altar
-- Faste pladser, visuel progression
+## Tribe-bygninger
+Spillerens base = **the Tribe** (kortet viser alle bygninger). Bygninger:
+- **Bonkery** — crafting (tidl. Forge)
+- **Thinkery** — research og unlocks (tidl. Research Center)
+- **Ogg's Hearth** — NPC'er, storyline, burn-mekanik (tidl. Camp/Hub + Ancestor's Altar)
+- **Oddities** — collection log (tidl. Museum)
+- **Tamery** — pets (tidl. Beast Den)
+- **Scoutery** — scouting og zone-afsløring (tidl. Watchtower)
 - Kan altid udvides med ny bygning (ny BuildingData Resource-fil)
 - Alle bygnings-level bonusser designes grundigt når relevant
 
-## Research Center
+## Thinkery (Research)
 - Koster ressourcer + tid
 - Én aktiv research ad gangen
 - Tidlig spil: karakter researcher (blokkerer expedition)

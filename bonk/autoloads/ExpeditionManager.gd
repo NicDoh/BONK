@@ -127,11 +127,13 @@ func _spawn_next_monster() -> void:
 
 func _grant_weapon_xp(damage: int) -> void:
 	if not CharacterManager.equipped_main_hand:
-		CharacterManager.gain_xp("strength", float(damage) * 0.5)
+		CharacterManager.gain_xp("strength", float(damage) * 5.0)
+		CharacterManager.gain_xp("speed", float(damage) * 2.5)
+		CharacterManager.gain_xp("accuracy", float(damage) * 2.5)
 		return
 
 	var weapon := CharacterManager.equipped_main_hand
-	var xp := float(damage)
+	var xp := float(damage) * 10.0
 
 	if weapon.two_handed:
 		CharacterManager.gain_xp("strength", xp * 0.5)

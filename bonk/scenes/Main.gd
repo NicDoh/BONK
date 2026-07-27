@@ -9,6 +9,7 @@ var player_hp_bar: ProgressBar
 
 var combat_log: RichTextLabel
 var action_button: Button
+var stats_label: Label
 
 var _log_lines: Array[String] = []
 const LOG_MAX := 8
@@ -72,6 +73,14 @@ func _ready() -> void:
 
 	inner.add_child(HSeparator.new())
 
+	# Stats panel
+	stats_label = Label.new()
+	stats_label.add_theme_font_size_override("font_size", 13)
+	inner.add_child(stats_label)
+	_refresh_stats()
+
+	inner.add_child(HSeparator.new())
+
 	# Combat log
 	combat_log = RichTextLabel.new()
 	combat_log.bbcode_enabled = true
@@ -97,6 +106,8 @@ func _ready() -> void:
 	EventBus.player_died.connect(_on_player_died)
 	EventBus.item_obtained.connect(_on_item_obtained)
 	EventBus.expedition_ended.connect(_on_expedition_ended)
+	EventBus.stat_leveled_up.connect(_on_stat_leveled_up)
+	EventBus.stat_xp_gained.connect(func(_s, _a): _refresh_stats())
 
 	_refresh_player_hp()
 
@@ -164,6 +175,19 @@ func _on_item_obtained(item: ItemData, quantity: int) -> void:
 
 func _on_expedition_ended(_result: Dictionary) -> void:
 	action_button.text = "Start Expedition"
+
+func _on_stat_leveled_up(stat_name: String, new_level: int) -> void:
+	_log("[color=cyan]%s leveled up to %d![/color]" % [stat_name.capitalize(), new_level])
+	_refresh_stats()
+
+func _refresh_stats() -> void:
+	var lines := []
+	for stat in ["hp", "strength", "defense", "speed", "accuracy"]:
+		var level := CharacterManager.get_level(stat)
+		var xp: float = CharacterManager.stats[stat]["xp"]
+		var needed := CharacterManager.xp_for_level(level + 1)
+		lines.append("%s: %d  (%.0f / %.0f xp)" % [stat.capitalize(), level, xp, needed])
+	stats_label.text = "\n".join(lines)
 
 func _log(text: String) -> void:
 	_log_lines.append(text)

@@ -353,10 +353,12 @@ Pet-regler:
 
 ---
 
-## 7. Byen
+## 7. Tribe-bygninger
 
-### Forge
-Crafting-hub for våben, rustning og items. Selve Forge-bygningen har egne levels og ser visuelt anderledes ud på hvert level (fra primitivt bålsted til ordentlig smedje).
+Spillerens base kaldes **the Tribe**. Kortet viser tribe'en oppefra med alle bygninger. Klikker man på en bygning går man ind i den.
+
+### Bonkery (tidl. Forge)
+Crafting-hub for våben, rustning og items. Selve Bonkery-bygningen har egne levels og ser visuelt anderledes ud på hvert level (fra primitivt bålsted til ordentlig smedje).
 
 #### Crafting-typer
 
@@ -397,8 +399,8 @@ Forge Level 3: Iron Bars + tid + "Advanced Forge Plans" (research unlock)
 Forge Level 4: Rare materials + tid + "Ancient Forge Manual" (fragment schematic)
 ```
 
-### Research Center
-Spillets **opdagelses- og unlock-motor**. Alt nyt indhold går igennem Research Center.
+### Thinkery (tidl. Research Center)
+Spillets **opdagelses- og unlock-motor**. Alt nyt indhold går igennem Thinkery.
 
 #### Pris og tid (besluttet)
 Koster **både ressourcer og tid**. Ressourcer betales med det samme, derefter venter man.
@@ -413,7 +415,7 @@ Sen research:     sjældne drops + dage
 #### Forsker-mekanik (besluttet)
 **Tidlig spil:** Kun spillerens karakter kan researche — valget er expedition eller research, ikke begge.
 
-**Sent unlock: NPC Forsker** via Camp/Hub. Research kører i baggrunden mens karakteren expediter — men langsommere eller dyrere:
+**Sent unlock: NPC Forsker** via Ogg's Hearth. Research kører i baggrunden mens karakteren expediter — men langsommere eller dyrere:
 ```
 Forsker alene:    Langsomt, karakter expediter frit
 Selv researcher:  Hurtigere, expedition stopper
@@ -442,12 +444,21 @@ unlocks: Array[String]             # hvad giver det
 
 Kan unlock: zoner, expedition modes, monster-viden, by-bygninger, Forge-schematics, % bonusser, quest-indhold og meget mere.
 
-### Camp / Hub
-- Stamme-base med NPC'er
-- NPC'er giver quests og storyline
-- Questtyper: [DISKUTERES]
+### Ogg's Hearth (tidl. Camp/Hub + Ancestor's Altar)
+Tribe'ens sociale centrum og ildsted. To formål flettet sammen:
 
-### Museum / Collection Log
+**Socialt/narrativt:**
+- NPC'er sidder rundt om bålet — nye karakterer dukker op efterhånden som spillet skrider frem
+- Rygter, gåder og hints om monstre og zoner
+- Storyline og quest-indhold
+- Første NPC er sandsynligvis Ogg selv
+
+**Burn-mekanik (tidl. Ancestor's Altar):**
+- Offer/brænd store mængder common ressourcer mod større mål
+- Sjældne research unlocks, permanente bonusser, special items, collection log entries
+- Giver common ressourcer mening i endgame
+
+### Oddities (tidl. Museum / Collection Log)
 **En af spillets største features.**
 
 #### Kategorier
@@ -487,24 +498,12 @@ LORE
 
 Drop-rates vist i loggen: [DISKUTERES]
 
-### Beast Den
+### Tamery (tidl. Beast Den)
 Ejer alt pet-relateret. Administrer aktivt pet, se alle ejede pets og passive bonusser.
 Bonusser per level: [DISKUTERES]
 
-### Watchtower
-Ejer exploration-domænet. Scout runs og zone-afsløring hører hjemme her fremfor Research Center.
-Bonusser per level: [DISKUTERES]
-
-### Trading Post
-Sælg ressourcer til NPC. Fremtidig markedsplads i multiplayer-version.
-Bonusser per level: [DISKUTERES]
-
-### Warehouse
-Storage-bonusser og inventory-relaterede upgrades.
-Bonusser per level: [DISKUTERES]
-
-### Ancestor's Altar
-Burn-mekanik — offer store mængder common ressourcer mod sjældne unlocks, permanente bonusser eller special items.
+### Scoutery (tidl. Watchtower)
+Ejer exploration-domænet. Scout runs og zone-afsløring hører hjemme her fremfor Thinkery.
 Bonusser per level: [DISKUTERES]
 
 ### Øvrige bygninger
@@ -675,8 +674,8 @@ Ikke stackable, men man kan have flere af samme item. Fremtidig markedsværdi i 
 
 **Salvage i Forge** — gear kan nedbrydes til et par ressourcer direkte i Forge UI. Ingen separat system.
 
-### Ancestor's Altar (burn-mekanik)
-By-bygning hvor man ofrer store mængder common ressourcer mod større mål:
+### Burn-mekanik (Ogg's Hearth)
+Offer store mængder common ressourcer mod større mål:
 - Sjældne research unlocks
 - Permanente bonusser
 - Special items der ikke kan fås andre steder
@@ -745,12 +744,13 @@ Signals tilføjes løbende når nye systemer bygges. EventBus starter med kamp- 
 
 ## ÅBNE DISKUSSIONSPUNKTER
 - [ ] Stat levelcap (99?)
-- [ ] Camp/Hub og NPC-system
+- [ ] Ogg's Hearth og NPC-system
 - [ ] Questtyper
-- [ ] Vises drop-rates i Museum?
+- [ ] Vises drop-rates i Oddities?
 - [ ] Monetisering
 - [ ] Visuel stil
 - [ ] Spiltitel
-- [ ] Prestige/rebirth-mekanik?
+- [ ] Tattoos som prestigesystem — trigger ukendt (stat milestones, collection log, zone completion eller kombination). Vises visuelt på karakteren. Diskuteres til phase 3/8.
 - [ ] Portrait vs. landscape
 - [ ] Bygnings-level bonusser (alle bygninger — diskuteres når relevant)
+- [ ] Inventory-skærm navn (spillerens stash/loot)
