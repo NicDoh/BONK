@@ -7,6 +7,7 @@ func save() -> void:
 		"character": CharacterManager.serialize(),
 		"inventory": InventoryManager.serialize(),
 		"expedition": ExpeditionManager.serialize(),
+		"city": CityManager.serialize(),
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
@@ -30,6 +31,8 @@ func load_save() -> void:
 		CharacterManager.deserialize(data["character"])
 	if data.has("inventory"):
 		InventoryManager.deserialize(data["inventory"])
+	if data.has("city"):
+		CityManager.deserialize(data["city"])
 
 func delete_save() -> void:
 	if FileAccess.file_exists(SAVE_PATH):

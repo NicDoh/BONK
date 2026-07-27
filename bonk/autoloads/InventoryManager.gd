@@ -72,20 +72,6 @@ func deserialize(data: Dictionary) -> void:
 	items.clear()
 	for slot_id in data:
 		var entry: Dictionary = data[slot_id]
-		var item := _find_item_by_id(entry["item_id"])
+		var item := ResourceRegistry.find_item(entry["item_id"])
 		if item:
 			items[slot_id] = {"data": item, "quantity": entry["quantity"]}
-
-func _find_item_by_id(item_id: String) -> ItemData:
-	var dir := DirAccess.open("res://data/")
-	if not dir:
-		return null
-	dir.list_dir_begin()
-	var file_name := dir.get_next()
-	while file_name != "":
-		if file_name.ends_with(".tres"):
-			var res := load("res://data/" + file_name)
-			if res is ItemData and res.id == item_id:
-				return res
-		file_name = dir.get_next()
-	return null

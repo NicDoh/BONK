@@ -1,7 +1,19 @@
-[gd_resource type="Resource" script_class="MonsterData" load_steps=3 format=3 uid="uid://cs22aavpigkq8"]
+[gd_resource type="Resource" script_class="MonsterData" load_steps=7 format=3 uid="uid://cs22aavpigkq8"]
 
 [ext_resource type="Script" uid="uid://bcbkorf3prq6t" path="res://resources/DropEntry.gd" id="1_30ph1"]
+[ext_resource type="ItemData" path="res://data/items/bones.tres" id="2_4ih6p"]
 [ext_resource type="Script" uid="uid://c37n5la3tyym0" path="res://resources/MonsterData.gd" id="2_cjb6j"]
+[ext_resource type="ItemData" path="res://data/items/hide.tres" id="3_xw17t"]
+
+[sub_resource type="Resource" id="Resource_p6r85"]
+script = ExtResource("1_30ph1")
+item = ExtResource("2_4ih6p")
+metadata/_custom_type_script = "uid://bcbkorf3prq6t"
+
+[sub_resource type="Resource" id="Resource_o4yvm"]
+script = ExtResource("1_30ph1")
+item = ExtResource("3_xw17t")
+metadata/_custom_type_script = "uid://bcbkorf3prq6t"
 
 [resource]
 script = ExtResource("2_cjb6j")
@@ -9,3 +21,4 @@ id = "test"
 name = "Test"
 hp = 5
 accuracy = 5
+drops = Array[ExtResource("1_30ph1")]([SubResource("Resource_p6r85"), SubResource("Resource_o4yvm")])
