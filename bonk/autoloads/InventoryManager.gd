@@ -2,7 +2,7 @@ extends Node
 
 const INVENTORY_CAP: int = 500
 
-# { item_id: { "data": ItemData, "quantity": int } }
+# { slot_id: { "item_id": String, "quantity": int, "metadata": Dictionary } }
 var items: Dictionary = {}
 
 func add_item(item: ItemData, quantity: int = 1) -> bool:
@@ -20,7 +20,7 @@ func add_item(item: ItemData, quantity: int = 1) -> bool:
 				EventBus.item_obtained.emit(item, added)
 			return added == quantity
 		else:
-			items[item.id] = {"data": item, "quantity": mini(quantity, item.max_stack)}
+			items[item.id] = {"item_id": item.id, "quantity": mini(quantity, item.max_stack), "metadata": {}}
 			EventBus.item_obtained.emit(item, items[item.id]["quantity"])
 			return true
 	else:
@@ -29,7 +29,7 @@ func add_item(item: ItemData, quantity: int = 1) -> bool:
 			if is_full():
 				break
 			var slot_id := item.id + "_" + str(Time.get_ticks_msec()) + "_" + str(i)
-			items[slot_id] = {"data": item, "quantity": 1}
+			items[slot_id] = {"item_id": item.id, "quantity": 1, "metadata": {}}
 			added += 1
 		if added > 0:
 			EventBus.item_obtained.emit(item, added)
@@ -52,19 +52,35 @@ func get_quantity(item_id: String) -> int:
 		return items[item_id]["quantity"]
 	return 0
 
+func get_metadata(slot_id: String) -> Dictionary:
+	if items.has(slot_id):
+		return items[slot_id]["metadata"]
+	return {}
+
+func set_metadata(slot_id: String, key: String, value) -> void:
+	if items.has(slot_id):
+		items[slot_id]["metadata"][key] = value
+
 func is_full() -> bool:
 	return items.size() >= INVENTORY_CAP
 
 func get_all_items() -> Array:
-	return items.values()
+	var result := []
+	for slot_id in items:
+		var slot: Dictionary = items[slot_id]
+		var data := ResourceRegistry.find_item(slot["item_id"])
+		if data:
+			result.append({"slot_id": slot_id, "data": data, "quantity": slot["quantity"], "metadata": slot["metadata"]})
+	return result
 
 func serialize() -> Dictionary:
 	var data := {}
 	for slot_id in items:
-		var entry = items[slot_id]
+		var slot: Dictionary = items[slot_id]
 		data[slot_id] = {
-			"item_id": entry["data"].id,
-			"quantity": entry["quantity"],
+			"item_id": slot["item_id"],
+			"quantity": slot["quantity"],
+			"metadata": slot["metadata"],
 		}
 	return data
 
@@ -72,6 +88,8 @@ func deserialize(data: Dictionary) -> void:
 	items.clear()
 	for slot_id in data:
 		var entry: Dictionary = data[slot_id]
-		var item := ResourceRegistry.find_item(entry["item_id"])
-		if item:
-			items[slot_id] = {"data": item, "quantity": entry["quantity"]}
+		items[slot_id] = {
+			"item_id": entry["item_id"],
+			"quantity": entry["quantity"],
+			"metadata": entry.get("metadata", {}),
+		}
