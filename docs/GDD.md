@@ -65,9 +65,15 @@ Fem stats med egne levels. Alle kan maxes på samme karakter — ingen permanent
 
 ### Stat-formel
 ```
-Total Strength = base_from_level + gear_bonus + building_bonus + research_bonus
+get_effective_stat(stat)
+  = base_level
+  + gear_bonus
+  + pet_bonus          (inaktive pets, når implementeret)
+  + research_bonus     (passive research unlocks)
+  + food_buff          (pre-expedition mad, når implementeret)
+  + shrine_bonus       (når implementeret)
 ```
-Stats gemmes aldrig direkte — beregnes altid live fra alle kilder. Ny kilde kan tilføjes uden at ændre eksisterende kode.
+Beregnes altid live i `CharacterManager.get_effective_stat()` — ét sted for alle bonuskilder. Når ny kilde tilføjes (buffs, tattoos, osv.) tilføjes blot en linje her.
 
 ### Stat levels (Runescape-inspireret)
 - Hver stat har sit eget level der stiger uafhængigt af de andre
