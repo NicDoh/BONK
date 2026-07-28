@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="MonsterData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://resources/MonsterData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/DropEntry.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/thread.tres" id="3"]
+[ext_resource type="Resource" path="res://data/items/silk_gland.tres" id="4"]
+[ext_resource type="Resource" path="res://data/items/venom_sac.tres" id="5"]
+
+[sub_resource type="Resource" id="Drop_thread"]
+script = ExtResource("2")
+item = ExtResource("3")
+quantity_min = 1
+quantity_max = 2
+weight = 1.0
+
+[sub_resource type="Resource" id="Drop_silk_gland"]
+script = ExtResource("2")
+item = ExtResource("4")
+quantity_min = 1
+quantity_max = 1
+weight = 1.0
+
+[sub_resource type="Resource" id="Drop_venom_sac"]
+script = ExtResource("2")
+item = ExtResource("5")
+quantity_min = 1
+quantity_max = 1
+weight = 1.0
+
+[resource]
+script = ExtResource("1")
+id = "tangler"
+name = "Tangler"
+description = "Eight legs, zero mercy."
+hp = 10
+strength = 2
+defense = 1
+speed = 4
+accuracy = 7
+drops_guaranteed = Array[ExtResource("2")]([SubResource("Drop_thread")])
+drops_common = Array[ExtResource("2")]([SubResource("Drop_silk_gland")])
+rare_table_chance = 0.05
+drops_rare = Array[ExtResource("2")]([SubResource("Drop_venom_sac")])
