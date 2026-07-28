@@ -782,6 +782,8 @@ Storyline og konkret quest-indhold designes når zoner og monstre er på plads.
 De allerførste proto-mennesker. Ogg har altid klaret det — men han er nu for gammel. Spilleren er den første der nogensinde er taget ud alene. Stammen ved ikke hvad der er derude.
 
 **Ogg:** Selvudnævnt visdomsmand. Hans hints er halvt forkerte, hans historier modsigende. Ikke så smart som han tror, og doven. Giver stammen humor og forklarer hvorfor spilleren selv må finde ud af alt. Andre NPC'er der unlockes undervejs er klogere — og mere ærlige om det.
+
+Ogg er spillets primære stemme — tutorial, milestones, zone-afsløringer og generel storytelling går gennem ham. Hans skæve perspektiv sætter tonen for hele spillet.
 - [ ] Portrait vs. landscape
 - [ ] Bygnings-level bonusser (alle bygninger — diskuteres når relevant)
 - [ ] Inventory-skærm navn (spillerens stash/loot)
