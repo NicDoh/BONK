@@ -320,6 +320,12 @@ drops_common: Array[DropEntry]       → pick one per kill via vægte
 drops_rare: Array[DropEntry]         → aktiveres med rare_table_chance, alle entries rulles uafhængigt
 drops_ultra_rare: Array[DropEntry]   → aktiveres med ultra_rare_table_chance, alle entries rulles uafhængigt
 
+**Planlagt: Simulation layer**
+Når quests, pets, buffs og events skal reagere på expedition rewards, bør `apply_offline_progress()` splittes i to:
+1. `ExpeditionManager.simulate_offline(elapsed) → { xp, drops, kills }` — ren beregning, rører intet
+2. GameManager (eller RewardManager) applicerer resultatet: `CharacterManager.apply_xp(result.xp)`, `InventoryManager.add_items(result.drops)`
+Gør ExpeditionManager 100% uafhængig af Inventory og Character. Implementeres når quests/pets/buffs tilføjes.
+
 **Planlagt: Set drop protection**
 Nogle rare drops tilhører et "sæt" (f.eks. 3 dele til ét våben). Systemet tracker hvilke dele spilleren har fået og udelukker allerede-fundne fra tabellen — indtil hele sættet er komplet, hvorefter alle dele igen er tilgængelige. Kræver Collection Log integration.
 ```
