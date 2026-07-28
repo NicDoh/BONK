@@ -1,181 +1,73 @@
 extends Control
 
+# Navigation
+var _current_screen: String = "expedition"
+var _screens: Dictionary = {}
+var _nav_buttons: Dictionary = {}
+
+# Expedition screen
 var monster_name_label: Label
 var monster_hp_label: Label
 var monster_hp_bar: ProgressBar
-
 var player_hp_label: Label
 var player_hp_bar: ProgressBar
-
 var combat_log: RichTextLabel
 var action_button: Button
+
+# Character screen
 var stats_label: Label
 var inventory_label: Label
 var gear_label: Label
-var craft_container: VBoxContainer
+var _equip_container: VBoxContainer
+var _unequip_container: VBoxContainer
 
-var _recipes: Array[CraftingRecipe] = []
+# Bonkery screen
+var craft_container: VBoxContainer
 var _building_label: Label
+
+# Thinkery screen
 var _research_container: VBoxContainer
 var _research_status_label: Label
 
+var _recipes: Array[CraftingRecipe] = []
 var _log_lines: Array[String] = []
-const LOG_MAX := 6
+const LOG_MAX := 8
 
 func _ready() -> void:
 	anchor_right = 1.0
 	anchor_bottom = 1.0
 
-	# Outer layout: scrollable content + fixed button at bottom
-	var outer := VBoxContainer.new()
-	outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(outer)
+	var root := VBoxContainer.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(root)
 
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	outer.add_child(scroll)
-
-	var margin := MarginContainer.new()
-	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Screen container
+	var screen_container := MarginContainer.new()
+	screen_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 20)
-	scroll.add_child(margin)
+		screen_container.add_theme_constant_override("margin_" + side, 16)
+	root.add_child(screen_container)
 
-	var inner := VBoxContainer.new()
-	inner.add_theme_constant_override("separation", 12)
-	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	margin.add_child(inner)
+	# Build screens
+	_build_expedition_screen(screen_container)
+	_build_character_screen(screen_container)
+	_build_tribe_screen(screen_container)
+	_build_bonkery_screen(screen_container)
+	_build_thinkery_screen(screen_container)
 
-	# Monster section
-	monster_name_label = Label.new()
-	monster_name_label.text = "No monster"
-	monster_name_label.add_theme_font_size_override("font_size", 20)
-	inner.add_child(monster_name_label)
+	# Bottom navigation
+	var nav := HBoxContainer.new()
+	nav.add_theme_constant_override("separation", 0)
+	root.add_child(nav)
 
-	monster_hp_bar = ProgressBar.new()
-	monster_hp_bar.min_value = 0
-	monster_hp_bar.value = 0
-	monster_hp_bar.custom_minimum_size.y = 20
-	inner.add_child(monster_hp_bar)
-
-	monster_hp_label = Label.new()
-	monster_hp_label.text = ""
-	inner.add_child(monster_hp_label)
-
-	inner.add_child(HSeparator.new())
-
-	# Player section
-	var player_title := Label.new()
-	player_title.text = "You"
-	player_title.add_theme_font_size_override("font_size", 20)
-	inner.add_child(player_title)
-
-	player_hp_bar = ProgressBar.new()
-	player_hp_bar.min_value = 0
-	player_hp_bar.custom_minimum_size.y = 20
-	inner.add_child(player_hp_bar)
-
-	player_hp_label = Label.new()
-	inner.add_child(player_hp_label)
-
-	inner.add_child(HSeparator.new())
-
-	# Stats
-	stats_label = Label.new()
-	stats_label.add_theme_font_size_override("font_size", 12)
-	inner.add_child(stats_label)
-	_refresh_stats()
-
-	inner.add_child(HSeparator.new())
-
-	# Inventory
-	inventory_label = Label.new()
-	inventory_label.add_theme_font_size_override("font_size", 12)
-	inner.add_child(inventory_label)
-	_refresh_inventory()
-
-	inner.add_child(HSeparator.new())
-
-	# Gear
-	gear_label = Label.new()
-	gear_label.add_theme_font_size_override("font_size", 12)
-	inner.add_child(gear_label)
-
-	_equip_container = VBoxContainer.new()
-	_equip_container.add_theme_constant_override("separation", 4)
-	inner.add_child(_equip_container)
-
-	_unequip_container = VBoxContainer.new()
-	_unequip_container.add_theme_constant_override("separation", 4)
-	inner.add_child(_unequip_container)
-
-	_refresh_gear()
-
-	inner.add_child(HSeparator.new())
-
-	# Buildings
-	_building_label = Label.new()
-	_building_label.add_theme_font_size_override("font_size", 12)
-	inner.add_child(_building_label)
-
-	var upgrade_btn := Button.new()
-	upgrade_btn.text = "Upgrade Bonkery"
-	upgrade_btn.pressed.connect(_on_upgrade_bonkery)
-	inner.add_child(upgrade_btn)
-
-	inner.add_child(HSeparator.new())
-	_refresh_buildings()
-
-	# Thinkery
-	var thinkery_title := Label.new()
-	thinkery_title.text = "Thinkery"
-	thinkery_title.add_theme_font_size_override("font_size", 16)
-	inner.add_child(thinkery_title)
-
-	_research_status_label = Label.new()
-	_research_status_label.add_theme_font_size_override("font_size", 12)
-	inner.add_child(_research_status_label)
-
-	_research_container = VBoxContainer.new()
-	_research_container.add_theme_constant_override("separation", 6)
-	inner.add_child(_research_container)
-
-	inner.add_child(HSeparator.new())
-	_refresh_research_ui()
-
-	# Crafting
-	var craft_title := Label.new()
-	craft_title.text = "Bonkery"
-	craft_title.add_theme_font_size_override("font_size", 16)
-	inner.add_child(craft_title)
-
-	craft_container = VBoxContainer.new()
-	craft_container.add_theme_constant_override("separation", 6)
-	inner.add_child(craft_container)
-	_load_recipes()
-	_refresh_craft_ui()
-
-	inner.add_child(HSeparator.new())
-
-	# Combat log
-	combat_log = RichTextLabel.new()
-	combat_log.bbcode_enabled = true
-	combat_log.fit_content = true
-	combat_log.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	inner.add_child(combat_log)
-
-	# Fixed button at bottom
-	var btn_margin := MarginContainer.new()
-	for side in ["left", "right", "bottom"]:
-		btn_margin.add_theme_constant_override("margin_" + side, 16)
-	btn_margin.add_theme_constant_override("margin_top", 8)
-	outer.add_child(btn_margin)
-
-	action_button = Button.new()
-	action_button.text = "Start Expedition"
-	action_button.custom_minimum_size.y = 48
-	action_button.pressed.connect(_on_action_pressed)
-	btn_margin.add_child(action_button)
+	for screen_id in ["expedition", "character", "tribe"]:
+		var label := {"expedition": "⚔ Expedition", "character": "👤 Character", "tribe": "🏕 Tribe"}
+		var btn := Button.new()
+		btn.text = label[screen_id]
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.pressed.connect(_navigate.bind(screen_id))
+		nav.add_child(btn)
+		_nav_buttons[screen_id] = btn
 
 	# Connect signals
 	EventBus.player_hit_monster.connect(_on_player_hit)
@@ -186,23 +78,20 @@ func _ready() -> void:
 	EventBus.monster_died.connect(_on_monster_died)
 	EventBus.player_died.connect(_on_player_died)
 	EventBus.item_obtained.connect(_on_item_obtained)
+	EventBus.item_removed.connect(func(_i, _q): _refresh_inventory())
 	EventBus.expedition_ended.connect(_on_expedition_ended)
 	EventBus.stat_leveled_up.connect(_on_stat_leveled_up)
 	EventBus.stat_xp_gained.connect(func(_s, _a): _refresh_stats())
 	EventBus.item_obtained.connect(func(_i, _q): _refresh_inventory(); _refresh_craft_ui())
-	EventBus.item_removed.connect(func(_i, _q): _refresh_inventory(); _refresh_craft_ui())
 	EventBus.item_crafted.connect(func(_r, _i): _refresh_inventory(); _refresh_gear(); _refresh_craft_ui())
 	EventBus.building_upgrade_completed.connect(func(_b, _l): _refresh_buildings(); _refresh_craft_ui())
 	EventBus.research_completed.connect(func(_r): _refresh_research_ui(); _log("[color=cyan]Research complete![/color]"))
-	EventBus.offline_progress_applied.connect(_on_offline_progress)
 	EventBus.content_unlocked.connect(func(id): _log("[color=cyan]Unlocked: %s[/color]" % id))
+	EventBus.offline_progress_applied.connect(_on_offline_progress)
 
-	_refresh_player_hp()
-
-	if not GameManager.pending_offline_summary.is_empty():
-		var s := GameManager.pending_offline_summary
-		_on_offline_progress(s["elapsed"], s)
-		GameManager.pending_offline_summary = {}
+	_load_recipes()
+	_refresh_all()
+	_navigate("expedition")
 
 	if ExpeditionManager.active and ExpeditionManager.current_monster:
 		var monster := ExpeditionManager.current_monster
@@ -211,13 +100,217 @@ func _ready() -> void:
 		monster_hp_bar.value = ExpeditionManager._monster_hp
 		action_button.text = "Recall"
 
+	if not GameManager.pending_offline_summary.is_empty():
+		var s := GameManager.pending_offline_summary
+		_on_offline_progress(s["elapsed"], s)
+		GameManager.pending_offline_summary = {}
+
+# --- Screen builders ---
+
+func _build_expedition_screen(parent: Control) -> void:
+	var screen := _make_scroll_screen("expedition", parent)
+
+	monster_name_label = Label.new()
+	monster_name_label.text = "No monster"
+	monster_name_label.add_theme_font_size_override("font_size", 22)
+	screen.add_child(monster_name_label)
+
+	monster_hp_bar = ProgressBar.new()
+	monster_hp_bar.min_value = 0
+	monster_hp_bar.custom_minimum_size.y = 20
+	screen.add_child(monster_hp_bar)
+
+	monster_hp_label = Label.new()
+	screen.add_child(monster_hp_label)
+
+	screen.add_child(HSeparator.new())
+
+	var player_title := Label.new()
+	player_title.text = "You"
+	player_title.add_theme_font_size_override("font_size", 22)
+	screen.add_child(player_title)
+
+	player_hp_bar = ProgressBar.new()
+	player_hp_bar.min_value = 0
+	player_hp_bar.custom_minimum_size.y = 20
+	screen.add_child(player_hp_bar)
+
+	player_hp_label = Label.new()
+	screen.add_child(player_hp_label)
+
+	screen.add_child(HSeparator.new())
+
+	combat_log = RichTextLabel.new()
+	combat_log.bbcode_enabled = true
+	combat_log.fit_content = true
+	combat_log.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	screen.add_child(combat_log)
+
+	screen.add_child(HSeparator.new())
+
+	action_button = Button.new()
+	action_button.text = "Start Expedition"
+	action_button.custom_minimum_size.y = 48
+	action_button.pressed.connect(_on_action_pressed)
+	screen.add_child(action_button)
+
+func _build_character_screen(parent: Control) -> void:
+	var screen := _make_scroll_screen("character", parent)
+
+	var stats_title := Label.new()
+	stats_title.text = "Stats"
+	stats_title.add_theme_font_size_override("font_size", 18)
+	screen.add_child(stats_title)
+
+	stats_label = Label.new()
+	stats_label.add_theme_font_size_override("font_size", 13)
+	screen.add_child(stats_label)
+
+	screen.add_child(HSeparator.new())
+
+	var gear_title := Label.new()
+	gear_title.text = "Gear"
+	gear_title.add_theme_font_size_override("font_size", 18)
+	screen.add_child(gear_title)
+
+	gear_label = Label.new()
+	gear_label.add_theme_font_size_override("font_size", 13)
+	screen.add_child(gear_label)
+
+	_unequip_container = VBoxContainer.new()
+	screen.add_child(_unequip_container)
+
+	screen.add_child(HSeparator.new())
+
+	var inv_title := Label.new()
+	inv_title.text = "Inventory"
+	inv_title.add_theme_font_size_override("font_size", 18)
+	screen.add_child(inv_title)
+
+	inventory_label = Label.new()
+	inventory_label.add_theme_font_size_override("font_size", 13)
+	screen.add_child(inventory_label)
+
+	_equip_container = VBoxContainer.new()
+	screen.add_child(_equip_container)
+
+func _build_tribe_screen(parent: Control) -> void:
+	var screen := _make_scroll_screen("tribe", parent)
+
+	var title := Label.new()
+	title.text = "The Tribe"
+	title.add_theme_font_size_override("font_size", 22)
+	screen.add_child(title)
+
+	screen.add_child(HSeparator.new())
+
+	for building in [["bonkery", "Bonkery"], ["thinkery", "Thinkery"]]:
+		var btn := Button.new()
+		btn.text = building[1]
+		btn.custom_minimum_size.y = 48
+		btn.pressed.connect(_navigate.bind(building[0]))
+		screen.add_child(btn)
+
+func _build_bonkery_screen(parent: Control) -> void:
+	var screen := _make_scroll_screen("bonkery", parent)
+
+	var back := _make_back_button()
+	screen.add_child(back)
+
+	var title := Label.new()
+	title.text = "Bonkery"
+	title.add_theme_font_size_override("font_size", 22)
+	screen.add_child(title)
+
+	screen.add_child(HSeparator.new())
+
+	_building_label = Label.new()
+	_building_label.add_theme_font_size_override("font_size", 13)
+	screen.add_child(_building_label)
+
+	var upgrade_btn := Button.new()
+	upgrade_btn.text = "Upgrade Bonkery"
+	upgrade_btn.pressed.connect(_on_upgrade_bonkery)
+	screen.add_child(upgrade_btn)
+
+	screen.add_child(HSeparator.new())
+
+	var craft_title := Label.new()
+	craft_title.text = "Crafting"
+	craft_title.add_theme_font_size_override("font_size", 16)
+	screen.add_child(craft_title)
+
+	craft_container = VBoxContainer.new()
+	screen.add_child(craft_container)
+
+func _build_thinkery_screen(parent: Control) -> void:
+	var screen := _make_scroll_screen("thinkery", parent)
+
+	var back := _make_back_button()
+	screen.add_child(back)
+
+	var title := Label.new()
+	title.text = "Thinkery"
+	title.add_theme_font_size_override("font_size", 22)
+	screen.add_child(title)
+
+	screen.add_child(HSeparator.new())
+
+	_research_status_label = Label.new()
+	_research_status_label.add_theme_font_size_override("font_size", 13)
+	screen.add_child(_research_status_label)
+
+	_research_container = VBoxContainer.new()
+	_research_container.add_theme_constant_override("separation", 8)
+	screen.add_child(_research_container)
+
+# --- Helpers ---
+
+func _make_scroll_screen(id: String, parent: Control) -> VBoxContainer:
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.visible = false
+	parent.add_child(scroll)
+	_screens[id] = scroll
+
+	var inner := VBoxContainer.new()
+	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inner.add_theme_constant_override("separation", 12)
+	scroll.add_child(inner)
+	return inner
+
+func _make_back_button() -> Button:
+	var btn := Button.new()
+	btn.text = "← Tribe"
+	btn.pressed.connect(_navigate.bind("tribe"))
+	return btn
+
+func _navigate(screen_id: String) -> void:
+	for id in _screens:
+		_screens[id].visible = (id == screen_id)
+	_current_screen = screen_id
+	if screen_id == "bonkery":
+		_refresh_buildings()
+		_refresh_craft_ui()
+	elif screen_id == "thinkery":
+		_refresh_research_ui()
+	elif screen_id == "character":
+		_refresh_stats()
+		_refresh_gear()
+		_refresh_inventory()
+
+# --- Process ---
+
 func _process(_delta: float) -> void:
 	if ExpeditionManager.active:
 		_refresh_player_hp()
 		_refresh_monster_hp()
-	if ResearchManager.active_research_id != "":
+	if ResearchManager.active_research_id != "" and _current_screen == "thinkery":
 		var secs := ResearchManager.time_remaining()
 		_research_status_label.text = "Researching: %s  (%.0fs left)" % [ResearchManager.active_research_id, secs]
+
+# --- Expedition ---
 
 func _on_action_pressed() -> void:
 	if ExpeditionManager.active:
@@ -279,9 +372,19 @@ func _on_item_obtained(item: ItemData, quantity: int) -> void:
 func _on_expedition_ended(_result: Dictionary) -> void:
 	action_button.text = "Start Expedition"
 
-func _on_stat_leveled_up(stat_name: String, new_level: int) -> void:
-	_log("[color=cyan]%s leveled up to %d![/color]" % [stat_name.capitalize(), new_level])
+func _log(text: String) -> void:
+	_log_lines.append(text)
+	if _log_lines.size() > LOG_MAX:
+		_log_lines = _log_lines.slice(_log_lines.size() - LOG_MAX)
+	combat_log.text = "\n".join(_log_lines)
+
+# --- Character ---
+
+func _refresh_all() -> void:
 	_refresh_stats()
+	_refresh_gear()
+	_refresh_inventory()
+	_refresh_player_hp()
 
 func _refresh_stats() -> void:
 	var lines := []
@@ -292,13 +395,68 @@ func _refresh_stats() -> void:
 		lines.append("%s: %d  (%.0f / %.0f xp)" % [stat.capitalize(), level, xp, needed])
 	stats_label.text = "\n".join(lines)
 
+func _on_stat_leveled_up(stat_name: String, new_level: int) -> void:
+	_log("[color=cyan]%s leveled up to %d![/color]" % [stat_name.capitalize(), new_level])
+	_refresh_stats()
+
+func _refresh_gear() -> void:
+	var main := CharacterManager.equipped_main_hand
+	var off := CharacterManager.equipped_off_hand
+	gear_label.text = "Main hand: %s\nOff hand:  %s" % [main.name if main else "none", off.name if off else "none"]
+	if _unequip_container:
+		for child in _unequip_container.get_children():
+			child.queue_free()
+		if main:
+			var btn := Button.new()
+			btn.text = "Unequip %s" % main.name
+			btn.pressed.connect(func(): CharacterManager.unequip(GearData.Slot.MAIN_HAND); _refresh_gear(); _refresh_stats())
+			_unequip_container.add_child(btn)
+		if off:
+			var btn := Button.new()
+			btn.text = "Unequip %s" % off.name
+			btn.pressed.connect(func(): CharacterManager.unequip(GearData.Slot.OFF_HAND); _refresh_gear(); _refresh_stats())
+			_unequip_container.add_child(btn)
+
+func _refresh_inventory() -> void:
+	var all := InventoryManager.get_all_items()
+	if all.is_empty():
+		inventory_label.text = "Empty"
+		if _equip_container:
+			for child in _equip_container.get_children():
+				child.queue_free()
+		return
+	var lines := []
+	for entry in all:
+		lines.append("%s x%d" % [entry["data"].name, entry["quantity"]])
+	inventory_label.text = "\n".join(lines)
+	_rebuild_equip_buttons()
+
+func _rebuild_equip_buttons() -> void:
+	if _equip_container == null:
+		return
+	for child in _equip_container.get_children():
+		child.queue_free()
+	for entry in InventoryManager.get_all_items():
+		var item: ItemData = entry["data"]
+		if not item is GearData:
+			continue
+		var gear := item as GearData
+		var btn := Button.new()
+		btn.text = "Equip %s" % gear.name
+		btn.pressed.connect(_on_equip_pressed.bind(gear))
+		_equip_container.add_child(btn)
+
+func _on_equip_pressed(gear: GearData) -> void:
+	CharacterManager.equip(gear)
+	_refresh_gear()
+	_refresh_stats()
+
+# --- Bonkery ---
+
 func _refresh_buildings() -> void:
 	var level := CityManager.get_level("bonkery")
 	var upgrading := CityManager.is_upgrading("bonkery")
-	var text := "Bonkery: Level %d" % level
-	if upgrading:
-		text += "  (upgrading...)"
-	_building_label.text = text
+	_building_label.text = "Bonkery: Level %d%s" % [level, "  (upgrading...)" if upgrading else ""]
 
 func _on_upgrade_bonkery() -> void:
 	var data := load("res://data/buildings/bonkery.tres") as BuildingData
@@ -308,49 +466,6 @@ func _on_upgrade_bonkery() -> void:
 	if CityManager.start_upgrade("bonkery", data, cost):
 		_log("[color=lime]Bonkery upgrading![/color]")
 		_refresh_buildings()
-	else:
-		_log("[color=gray]Cannot upgrade Bonkery.[/color]")
-
-func _refresh_research_ui() -> void:
-	for child in _research_container.get_children():
-		child.queue_free()
-
-	if ResearchManager.active_research_id != "":
-		var secs := ResearchManager.time_remaining()
-		_research_status_label.text = "Researching: %s  (%.0fs left)" % [ResearchManager.active_research_id, secs]
-	else:
-		_research_status_label.text = "Idle"
-
-	var all := ResourceRegistry.get_all_research()
-	var available := ResearchManager.get_available(all)
-	for data in available:
-		var row := HBoxContainer.new()
-		var label := Label.new()
-		label.text = "%s  (%ds)" % [data.title, int(data.duration_seconds)]
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		label.add_theme_font_size_override("font_size", 12)
-		row.add_child(label)
-		var btn := Button.new()
-		btn.text = "Research"
-		btn.disabled = ResearchManager.active_research_id != ""
-		btn.pressed.connect(_on_research_pressed.bind(data))
-		row.add_child(btn)
-		_research_container.add_child(row)
-
-	for data in all:
-		if not ResearchManager.is_completed(data.id):
-			continue
-		var done_label := Label.new()
-		done_label.text = "✓ %s" % data.title
-		done_label.add_theme_font_size_override("font_size", 12)
-		_research_container.add_child(done_label)
-
-func _on_research_pressed(data: ResearchData) -> void:
-	if ResearchManager.start(data):
-		_log("[color=yellow]Started: %s[/color]" % data.title)
-		_refresh_research_ui()
-	else:
-		_log("[color=gray]Cannot start research.[/color]")
 
 func _load_recipes() -> void:
 	var dir := DirAccess.open("res://data/recipes/")
@@ -366,6 +481,8 @@ func _load_recipes() -> void:
 		file_name = dir.get_next()
 
 func _refresh_craft_ui() -> void:
+	if not craft_container:
+		return
 	for child in craft_container.get_children():
 		child.queue_free()
 	for recipe in _recipes:
@@ -391,72 +508,46 @@ func _on_craft_pressed(recipe: CraftingRecipe) -> void:
 	if CraftingManager.craft(recipe):
 		_log("[color=lime]Crafted: %s[/color]" % recipe.result_item.name)
 
-func _refresh_gear() -> void:
-	var main := CharacterManager.equipped_main_hand
-	var off := CharacterManager.equipped_off_hand
-	var lines := ["Gear:"]
-	lines.append("  Main hand: %s" % (main.name if main else "none"))
-	lines.append("  Off hand:  %s" % (off.name if off else "none"))
-	gear_label.text = "\n".join(lines)
-	if _unequip_container:
-		_rebuild_unequip_buttons(_unequip_container)
-	_rebuild_equip_buttons()
+# --- Thinkery ---
 
-func _rebuild_unequip_buttons(container: VBoxContainer) -> void:
-	for child in container.get_children():
-		child.queue_free()
-	var main := CharacterManager.equipped_main_hand
-	var off := CharacterManager.equipped_off_hand
-	if main:
-		var btn := Button.new()
-		btn.text = "Unequip %s" % main.name
-		btn.pressed.connect(func(): CharacterManager.unequip(GearData.Slot.MAIN_HAND); _refresh_gear(); _refresh_stats())
-		container.add_child(btn)
-	if off:
-		var btn := Button.new()
-		btn.text = "Unequip %s" % off.name
-		btn.pressed.connect(func(): CharacterManager.unequip(GearData.Slot.OFF_HAND); _refresh_gear(); _refresh_stats())
-		container.add_child(btn)
-
-func _refresh_inventory() -> void:
-	var all := InventoryManager.get_all_items()
-	if all.is_empty():
-		inventory_label.text = "Inventory: empty"
+func _refresh_research_ui() -> void:
+	if not _research_container:
 		return
-	var lines := ["Inventory:"]
-	for entry in all:
-		var item: ItemData = entry["data"]
-		var line := "  %s x%d" % [item.name, entry["quantity"]]
-		if item is GearData:
-			line += "  [equip →]"
-		lines.append(line)
-	inventory_label.text = "\n".join(lines)
-	# Equip buttons — rebuild below gear label would be complex, use a simple approach:
-	# If player has bone_club and it's not equipped, show equip option in gear section
-	_rebuild_equip_buttons()
-
-var _equip_container: VBoxContainer = null
-var _unequip_container: VBoxContainer = null
-
-func _rebuild_equip_buttons() -> void:
-	if _equip_container == null:
-		return
-	for child in _equip_container.get_children():
+	for child in _research_container.get_children():
 		child.queue_free()
-	for entry in InventoryManager.get_all_items():
-		var item: ItemData = entry["data"]
-		if not item is GearData:
+	if ResearchManager.active_research_id != "":
+		var secs := ResearchManager.time_remaining()
+		_research_status_label.text = "Researching: %s  (%.0fs left)" % [ResearchManager.active_research_id, secs]
+	else:
+		_research_status_label.text = "Idle"
+	var all := ResourceRegistry.get_all_research()
+	var available := ResearchManager.get_available(all)
+	for data in available:
+		var row := HBoxContainer.new()
+		var label := Label.new()
+		label.text = "%s  (%ds)" % [data.title, int(data.duration_seconds)]
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
+		var btn := Button.new()
+		btn.text = "Research"
+		btn.disabled = ResearchManager.active_research_id != ""
+		btn.pressed.connect(_on_research_pressed.bind(data))
+		row.add_child(btn)
+		_research_container.add_child(row)
+	for data in all:
+		if not ResearchManager.is_completed(data.id):
 			continue
-		var gear := item as GearData
-		var btn := Button.new()
-		btn.text = "Equip %s" % gear.name
-		btn.pressed.connect(_on_equip_pressed.bind(gear))
-		_equip_container.add_child(btn)
+		var done_label := Label.new()
+		done_label.text = "✓ %s" % data.title
+		_research_container.add_child(done_label)
 
-func _on_equip_pressed(gear: GearData) -> void:
-	CharacterManager.equip(gear)
-	_refresh_gear()
-	_refresh_stats()
+func _on_research_pressed(data: ResearchData) -> void:
+	if ResearchManager.start(data):
+		_refresh_research_ui()
+	else:
+		_log("[color=gray]Cannot start research.[/color]")
+
+# --- Offline progress ---
 
 func _on_offline_progress(elapsed: float, summary: Dictionary) -> void:
 	var mins := int(elapsed / 60)
@@ -465,9 +556,3 @@ func _on_offline_progress(elapsed: float, summary: Dictionary) -> void:
 		_log("[color=gold]  %s x%d[/color]" % [item_name, summary["drops"][item_name]])
 	_refresh_inventory()
 	_refresh_stats()
-
-func _log(text: String) -> void:
-	_log_lines.append(text)
-	if _log_lines.size() > LOG_MAX:
-		_log_lines = _log_lines.slice(_log_lines.size() - LOG_MAX)
-	combat_log.text = "\n".join(_log_lines)

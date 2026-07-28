@@ -99,4 +99,8 @@ func serialize() -> Dictionary:
 func deserialize(data: Dictionary) -> void:
 	stats = data["stats"]
 	current_hp = data["current_hp"]
+	var mh_id: String = data.get("equipped_main_hand", "")
+	var oh_id: String = data.get("equipped_off_hand", "")
+	equipped_main_hand = ResourceRegistry.find_item(mh_id) as GearData if mh_id != "" else null
+	equipped_off_hand = ResourceRegistry.find_item(oh_id) as GearData if oh_id != "" else null
 	recalculate_max_hp()
