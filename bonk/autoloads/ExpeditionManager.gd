@@ -213,13 +213,74 @@ func _get_monster_tick_interval() -> float:
 		return 3.0
 	return clampf(3.0 - (current_monster.speed * 0.05), 0.5, 3.0)
 
-func calculate_offline_kills(elapsed: float) -> int:
+func apply_offline_progress(elapsed: float) -> Dictionary:
 	if not current_monster:
-		return 0
+		return {}
+
 	var avg_damage := maxi(1, CharacterManager.get_effective_stat("strength") - current_monster.defense / 2)
 	var ticks_per_kill := ceili(float(current_monster.hp) / float(avg_damage))
 	var time_per_kill := ticks_per_kill * _get_player_tick_interval()
-	return int(elapsed / time_per_kill)
+	var kills := int(elapsed / time_per_kill)
+	if kills <= 0:
+		return {}
+
+	var drop_bonus := 0.0
+	if CharacterManager.equipped_main_hand:
+		drop_bonus = CharacterManager.equipped_main_hand.bonus_drop_chance
+	if CharacterManager.equipped_off_hand:
+		drop_bonus += CharacterManager.equipped_off_hand.bonus_drop_chance
+
+	var drops_summary: Dictionary = {}
+	for i in kills:
+		var results := _simulate_kill_drops(drop_bonus)
+		for item_name in results:
+			drops_summary[item_name] = drops_summary.get(item_name, 0) + results[item_name]
+
+	var xp_per_kill := float(avg_damage * ticks_per_kill)
+	CharacterManager.gain_xp("strength", xp_per_kill * kills * 0.5)
+	CharacterManager.gain_xp("speed", xp_per_kill * kills * 0.25)
+	CharacterManager.gain_xp("accuracy", xp_per_kill * kills * 0.25)
+
+	return {"kills": kills, "elapsed": elapsed, "drops": drops_summary}
+
+func _simulate_kill_drops(drop_bonus: float) -> Dictionary:
+	var summary: Dictionary = {}
+	for e in current_monster.drops_guaranteed:
+		var qty := randi_range(e.quantity_min, e.quantity_max)
+		InventoryManager.add_item(e.item, qty)
+		summary[e.item.name] = summary.get(e.item.name, 0) + qty
+	if not current_monster.drops_common.is_empty():
+		var entry := _weighted_pick_drop(current_monster.drops_common, drop_bonus)
+		var qty := randi_range(entry.quantity_min, entry.quantity_max)
+		InventoryManager.add_item(entry.item, qty)
+		summary[entry.item.name] = summary.get(entry.item.name, 0) + qty
+	if current_monster.rare_table_chance > 0.0 and not current_monster.drops_rare.is_empty():
+		if randf() < current_monster.rare_table_chance * (1.0 + drop_bonus):
+			for e in current_monster.drops_rare:
+				if randf() < e.weight:
+					var qty := randi_range(e.quantity_min, e.quantity_max)
+					InventoryManager.add_item(e.item, qty)
+					summary[e.item.name] = summary.get(e.item.name, 0) + qty
+	if current_monster.ultra_rare_table_chance > 0.0 and not current_monster.drops_ultra_rare.is_empty():
+		if randf() < current_monster.ultra_rare_table_chance:
+			for e in current_monster.drops_ultra_rare:
+				if randf() < e.weight:
+					var qty := randi_range(e.quantity_min, e.quantity_max)
+					InventoryManager.add_item(e.item, qty)
+					summary[e.item.name] = summary.get(e.item.name, 0) + qty
+	return summary
+
+func _weighted_pick_drop(entries: Array[DropEntry], drop_bonus: float) -> DropEntry:
+	var total := 0.0
+	for e in entries:
+		total += e.weight * (1.0 + drop_bonus)
+	var roll := randf() * total
+	var cumulative := 0.0
+	for e in entries:
+		cumulative += e.weight * (1.0 + drop_bonus)
+		if roll <= cumulative:
+			return e
+	return entries[-1]
 
 func serialize() -> Dictionary:
 	return {
