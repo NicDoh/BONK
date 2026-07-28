@@ -26,6 +26,7 @@ signal inventory_full()
 # Expedition
 signal expedition_started(zone_id: String, mode: String)
 signal expedition_ended(result: Dictionary)
+signal monster_spawned(monster: MonsterData)
 signal offline_progress_applied(duration: float, summary: Dictionary)
 
 # Research

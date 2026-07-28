@@ -3,6 +3,7 @@ extends Node
 enum Mode { ROAM }
 
 var active: bool = false
+var current_zone: ZoneData = null
 var current_zone_id: String = ""
 var current_mode: Mode = Mode.ROAM
 var current_monster: MonsterData = null
@@ -30,25 +31,45 @@ func _process(delta: float) -> void:
 		if not CharacterManager.is_alive():
 			_on_player_died()
 
-func start(zone_id: String, monster: MonsterData, mode: Mode = Mode.ROAM) -> void:
+func start(zone: ZoneData, mode: Mode = Mode.ROAM) -> void:
 	if active:
 		return
-	current_zone_id = zone_id
+	current_zone = zone
+	current_zone_id = zone.id
 	current_mode = mode
-	current_monster = monster
-	_monster_hp = monster.hp
-	_player_tick_timer = 0.0
-	_monster_tick_timer = 0.0
+	_pick_next_monster()
 	active = true
 	CharacterManager.heal_to_full()
-	EventBus.expedition_started.emit(zone_id, Mode.keys()[mode])
+	EventBus.expedition_started.emit(zone.id, Mode.keys()[mode])
 
 func recall() -> void:
 	if not active:
 		return
 	active = false
 	current_monster = null
+	current_zone = null
 	EventBus.expedition_ended.emit({"reason": "recalled"})
+
+func _pick_next_monster() -> void:
+	match current_mode:
+		Mode.ROAM:
+			current_monster = _weighted_random(current_zone.roam_monsters)
+	_monster_hp = current_monster.hp
+	_player_tick_timer = 0.0
+	_monster_tick_timer = 0.0
+	EventBus.monster_spawned.emit(current_monster)
+
+func _weighted_random(entries: Array[ZoneMonsterEntry]) -> MonsterData:
+	var total := 0.0
+	for e in entries:
+		total += e.weight
+	var roll := randf() * total
+	var cumulative := 0.0
+	for e in entries:
+		cumulative += e.weight
+		if roll <= cumulative:
+			return e.monster
+	return entries[-1].monster
 
 func _player_attack() -> void:
 	var accuracy := CharacterManager.get_effective_stat("accuracy")
@@ -84,7 +105,6 @@ func _monster_attack() -> void:
 
 	var damage := maxi(1, current_monster.strength - player_def / 2)
 
-	# Block check (off-hand shield)
 	if CharacterManager.equipped_off_hand and CharacterManager.equipped_off_hand.slot == GearData.Slot.OFF_HAND:
 		var block_chance := clampf(player_def / float(player_def + current_monster.strength), 0.0, 0.6)
 		if randf() < block_chance:
@@ -99,10 +119,11 @@ func _monster_attack() -> void:
 func _on_monster_died() -> void:
 	EventBus.monster_died.emit(current_monster)
 	_roll_drops()
-	_spawn_next_monster()
+	_pick_next_monster()
 
 func _on_player_died() -> void:
 	active = false
+	current_zone = null
 	EventBus.player_died.emit()
 	EventBus.expedition_ended.emit({"reason": "died"})
 
@@ -119,11 +140,6 @@ func _roll_drops() -> void:
 		if roll < adjusted_weight:
 			var qty := randi_range(entry.quantity_min, entry.quantity_max)
 			InventoryManager.add_item(entry.item, qty)
-
-func _spawn_next_monster() -> void:
-	_monster_hp = current_monster.hp
-	_player_tick_timer = 0.0
-	_monster_tick_timer = 0.0
 
 func _grant_weapon_xp(damage: int) -> void:
 	if not CharacterManager.equipped_main_hand:
@@ -179,13 +195,17 @@ func serialize() -> Dictionary:
 	return {
 		"active": active,
 		"zone_id": current_zone_id,
+		"zone_path": current_zone.resource_path if current_zone else "",
 		"monster_path": current_monster.resource_path if current_monster else "",
 	}
 
 func deserialize(data: Dictionary) -> void:
 	current_zone_id = data.get("zone_id", "")
+	var zone_path: String = data.get("zone_path", "")
+	if zone_path != "":
+		current_zone = load(zone_path) as ZoneData
 	var monster_path: String = data.get("monster_path", "")
 	if monster_path != "":
 		current_monster = load(monster_path) as MonsterData
 		_monster_hp = current_monster.hp
-	active = data.get("active", false) and current_monster != null
+	active = data.get("active", false) and current_zone != null and current_monster != null

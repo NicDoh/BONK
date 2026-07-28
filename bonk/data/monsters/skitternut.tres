@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MonsterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/MonsterData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "skitternut"
+name = "Skitternut"
+description = "Fast and frantic. Gone before you know it hit you."
+hp = 6
+strength = 1
+defense = 1
+speed = 8
+accuracy = 10

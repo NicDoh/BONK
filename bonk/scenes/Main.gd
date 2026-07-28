@@ -5,14 +5,26 @@ var _current_screen: String = "expedition"
 var _screens: Dictionary = {}
 var _nav_buttons: Dictionary = {}
 
-# Expedition screen
+# Expedition views
+var _expedition_view: String = "world"  # world / zone / combat
+var _selected_zone: ZoneData = null
+var _world_container: VBoxContainer
+var _zone_container: VBoxContainer
+var _combat_container: VBoxContainer
+
+# Zone detail widgets
+var _zone_title_label: Label
+var _zone_desc_label: Label
+var _activity_container: VBoxContainer
+
+# Combat widgets
+var _combat_zone_label: Label
 var monster_name_label: Label
 var monster_hp_label: Label
 var monster_hp_bar: ProgressBar
 var player_hp_label: Label
 var player_hp_bar: ProgressBar
 var combat_log: RichTextLabel
-var action_button: Button
 
 # Character screen
 var stats_label: Label
@@ -41,41 +53,38 @@ func _ready() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
-	# Screen container
 	var screen_container := MarginContainer.new()
 	screen_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	for side in ["left", "right", "top", "bottom"]:
 		screen_container.add_theme_constant_override("margin_" + side, 16)
 	root.add_child(screen_container)
 
-	# Build screens
 	_build_expedition_screen(screen_container)
 	_build_character_screen(screen_container)
 	_build_tribe_screen(screen_container)
 	_build_bonkery_screen(screen_container)
 	_build_thinkery_screen(screen_container)
 
-	# Bottom navigation
 	var nav := HBoxContainer.new()
 	nav.add_theme_constant_override("separation", 0)
 	root.add_child(nav)
 
 	for screen_id in ["expedition", "character", "tribe"]:
-		var label := {"expedition": "⚔ Expedition", "character": "👤 Character", "tribe": "🏕 Tribe"}
+		var labels := {"expedition": "Expedition", "character": "Character", "tribe": "Tribe"}
 		var btn := Button.new()
-		btn.text = label[screen_id]
+		btn.text = labels[screen_id]
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.pressed.connect(_navigate.bind(screen_id))
 		nav.add_child(btn)
 		_nav_buttons[screen_id] = btn
 
-	# Connect signals
 	EventBus.player_hit_monster.connect(_on_player_hit)
 	EventBus.player_missed.connect(_on_player_missed)
 	EventBus.monster_hit_player.connect(_on_monster_hit)
 	EventBus.player_blocked.connect(_on_player_blocked)
 	EventBus.monster_missed.connect(_on_monster_missed)
 	EventBus.monster_died.connect(_on_monster_died)
+	EventBus.monster_spawned.connect(_on_monster_spawned)
 	EventBus.player_died.connect(_on_player_died)
 	EventBus.item_obtained.connect(_on_item_obtained)
 	EventBus.item_removed.connect(func(_i, _q): _refresh_inventory())
@@ -91,14 +100,14 @@ func _ready() -> void:
 
 	_load_recipes()
 	_refresh_all()
-	_navigate("expedition")
 
 	if ExpeditionManager.active and ExpeditionManager.current_monster:
-		var monster := ExpeditionManager.current_monster
-		monster_name_label.text = monster.name
-		monster_hp_bar.max_value = monster.hp
-		monster_hp_bar.value = ExpeditionManager._monster_hp
-		action_button.text = "Recall"
+		_set_expedition_view("combat")
+		_refresh_combat_header()
+	else:
+		_set_expedition_view("world")
+
+	_navigate("expedition")
 
 	if not GameManager.pending_offline_summary.is_empty():
 		var s := GameManager.pending_offline_summary
@@ -108,51 +117,91 @@ func _ready() -> void:
 # --- Screen builders ---
 
 func _build_expedition_screen(parent: Control) -> void:
-	var screen := _make_scroll_screen("expedition", parent)
+	var scroll := _make_scroll_screen("expedition", parent)
+
+	# World view
+	_world_container = VBoxContainer.new()
+	_world_container.add_theme_constant_override("separation", 12)
+	scroll.add_child(_world_container)
+
+	# Zone detail view
+	_zone_container = VBoxContainer.new()
+	_zone_container.add_theme_constant_override("separation", 12)
+	_zone_container.visible = false
+	scroll.add_child(_zone_container)
+
+	var zone_back := Button.new()
+	zone_back.text = "← World"
+	zone_back.pressed.connect(func(): _set_expedition_view("world"))
+	_zone_container.add_child(zone_back)
+
+	_zone_title_label = Label.new()
+	_zone_title_label.add_theme_font_size_override("font_size", 22)
+	_zone_container.add_child(_zone_title_label)
+
+	_zone_desc_label = Label.new()
+	_zone_desc_label.add_theme_font_size_override("font_size", 13)
+	_zone_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_zone_container.add_child(_zone_desc_label)
+
+	_zone_container.add_child(HSeparator.new())
+
+	_activity_container = VBoxContainer.new()
+	_activity_container.add_theme_constant_override("separation", 8)
+	_zone_container.add_child(_activity_container)
+
+	# Combat view
+	_combat_container = VBoxContainer.new()
+	_combat_container.add_theme_constant_override("separation", 12)
+	_combat_container.visible = false
+	scroll.add_child(_combat_container)
+
+	_combat_zone_label = Label.new()
+	_combat_zone_label.add_theme_font_size_override("font_size", 13)
+	_combat_container.add_child(_combat_zone_label)
 
 	monster_name_label = Label.new()
-	monster_name_label.text = "No monster"
 	monster_name_label.add_theme_font_size_override("font_size", 22)
-	screen.add_child(monster_name_label)
+	_combat_container.add_child(monster_name_label)
 
 	monster_hp_bar = ProgressBar.new()
 	monster_hp_bar.min_value = 0
 	monster_hp_bar.custom_minimum_size.y = 20
-	screen.add_child(monster_hp_bar)
+	_combat_container.add_child(monster_hp_bar)
 
 	monster_hp_label = Label.new()
-	screen.add_child(monster_hp_label)
+	_combat_container.add_child(monster_hp_label)
 
-	screen.add_child(HSeparator.new())
+	_combat_container.add_child(HSeparator.new())
 
 	var player_title := Label.new()
 	player_title.text = "You"
 	player_title.add_theme_font_size_override("font_size", 22)
-	screen.add_child(player_title)
+	_combat_container.add_child(player_title)
 
 	player_hp_bar = ProgressBar.new()
 	player_hp_bar.min_value = 0
 	player_hp_bar.custom_minimum_size.y = 20
-	screen.add_child(player_hp_bar)
+	_combat_container.add_child(player_hp_bar)
 
 	player_hp_label = Label.new()
-	screen.add_child(player_hp_label)
+	_combat_container.add_child(player_hp_label)
 
-	screen.add_child(HSeparator.new())
+	_combat_container.add_child(HSeparator.new())
 
 	combat_log = RichTextLabel.new()
 	combat_log.bbcode_enabled = true
 	combat_log.fit_content = true
 	combat_log.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	screen.add_child(combat_log)
+	_combat_container.add_child(combat_log)
 
-	screen.add_child(HSeparator.new())
+	_combat_container.add_child(HSeparator.new())
 
-	action_button = Button.new()
-	action_button.text = "Start Expedition"
-	action_button.custom_minimum_size.y = 48
-	action_button.pressed.connect(_on_action_pressed)
-	screen.add_child(action_button)
+	var recall_btn := Button.new()
+	recall_btn.text = "Recall"
+	recall_btn.custom_minimum_size.y = 48
+	recall_btn.pressed.connect(_on_recall_pressed)
+	_combat_container.add_child(recall_btn)
 
 func _build_character_screen(parent: Control) -> void:
 	var screen := _make_scroll_screen("character", parent)
@@ -299,6 +348,21 @@ func _navigate(screen_id: String) -> void:
 		_refresh_stats()
 		_refresh_gear()
 		_refresh_inventory()
+	elif screen_id == "expedition":
+		if ExpeditionManager.active:
+			_set_expedition_view("combat")
+		else:
+			_set_expedition_view("world")
+
+func _set_expedition_view(view: String) -> void:
+	_expedition_view = view
+	_world_container.visible = (view == "world")
+	_zone_container.visible = (view == "zone")
+	_combat_container.visible = (view == "combat")
+	if view == "world":
+		_refresh_zone_list()
+	elif view == "zone":
+		_refresh_zone_detail()
 
 # --- Process ---
 
@@ -310,21 +374,101 @@ func _process(_delta: float) -> void:
 		var secs := ResearchManager.time_remaining()
 		_research_status_label.text = "Researching: %s  (%.0fs left)" % [ResearchManager.active_research_id, secs]
 
-# --- Expedition ---
+# --- Expedition: world view ---
 
-func _on_action_pressed() -> void:
-	if ExpeditionManager.active:
-		ExpeditionManager.recall()
-		action_button.text = "Start Expedition"
-	else:
-		var monster := load("res://data/test_monster.tres") as MonsterData
-		ExpeditionManager.start("test_zone", monster)
-		monster_name_label.text = monster.name
-		monster_hp_bar.max_value = monster.hp
-		monster_hp_bar.value = monster.hp
-		monster_hp_label.text = "%d / %d" % [monster.hp, monster.hp]
-		action_button.text = "Recall"
-		_log("--- Expedition started ---")
+func _refresh_zone_list() -> void:
+	for child in _world_container.get_children():
+		child.queue_free()
+
+	var title := Label.new()
+	title.text = "Where to?"
+	title.add_theme_font_size_override("font_size", 22)
+	_world_container.add_child(title)
+
+	var zones := ResourceRegistry.get_all_zones()
+	if zones.is_empty():
+		var lbl := Label.new()
+		lbl.text = "No zones available."
+		_world_container.add_child(lbl)
+		return
+
+	for zone in zones:
+		var z := zone as ZoneData
+		var unlocked := z.required_unlock == "" or ResearchManager.is_unlocked(z.required_unlock)
+		var row := HBoxContainer.new()
+		var lbl := Label.new()
+		lbl.text = z.name
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lbl.add_theme_font_size_override("font_size", 16)
+		row.add_child(lbl)
+		var btn := Button.new()
+		btn.text = "→"
+		btn.disabled = not unlocked
+		btn.pressed.connect(_on_zone_selected.bind(z))
+		row.add_child(btn)
+		_world_container.add_child(row)
+
+func _on_zone_selected(zone: ZoneData) -> void:
+	_selected_zone = zone
+	_set_expedition_view("zone")
+
+# --- Expedition: zone detail view ---
+
+func _refresh_zone_detail() -> void:
+	if not _selected_zone:
+		return
+	_zone_title_label.text = _selected_zone.name
+	_zone_desc_label.text = _selected_zone.description
+
+	for child in _activity_container.get_children():
+		child.queue_free()
+
+	var roam_row := HBoxContainer.new()
+	var roam_lbl := Label.new()
+	roam_lbl.text = "Roam"
+	roam_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	roam_lbl.add_theme_font_size_override("font_size", 16)
+	roam_row.add_child(roam_lbl)
+	var roam_btn := Button.new()
+	roam_btn.text = "Start"
+	roam_btn.disabled = _selected_zone.roam_monsters.is_empty()
+	roam_btn.pressed.connect(_on_start_expedition.bind(ExpeditionManager.Mode.ROAM))
+	roam_row.add_child(roam_btn)
+	_activity_container.add_child(roam_row)
+
+	var boss_row := HBoxContainer.new()
+	var boss_lbl := Label.new()
+	boss_lbl.text = "Boss Run"
+	boss_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	boss_lbl.add_theme_font_size_override("font_size", 16)
+	boss_row.add_child(boss_lbl)
+	var boss_btn := Button.new()
+	boss_btn.text = "Start"
+	boss_btn.disabled = true
+	boss_row.add_child(boss_btn)
+	_activity_container.add_child(boss_row)
+
+func _on_start_expedition(mode: ExpeditionManager.Mode) -> void:
+	if not _selected_zone:
+		return
+	ExpeditionManager.start(_selected_zone, mode)
+	_refresh_combat_header()
+	_set_expedition_view("combat")
+	_log("--- %s — Roam ---" % _selected_zone.name)
+
+func _refresh_combat_header() -> void:
+	if not ExpeditionManager.current_monster:
+		return
+	var monster := ExpeditionManager.current_monster
+	_combat_zone_label.text = "%s — Roam" % ExpeditionManager.current_zone_id
+	monster_name_label.text = monster.name
+	monster_hp_bar.max_value = monster.hp
+	monster_hp_bar.value = ExpeditionManager._monster_hp
+
+func _on_recall_pressed() -> void:
+	ExpeditionManager.recall()
+
+# --- Expedition: combat ---
 
 func _refresh_player_hp() -> void:
 	var hp := CharacterManager.current_hp
@@ -362,15 +506,21 @@ func _on_monster_missed() -> void:
 func _on_monster_died(_monster: MonsterData) -> void:
 	_log("[color=green]Monster defeated![/color]")
 
+func _on_monster_spawned(monster: MonsterData) -> void:
+	monster_name_label.text = monster.name
+	monster_hp_bar.max_value = monster.hp
+	monster_hp_bar.value = monster.hp
+	monster_hp_label.text = "%d / %d" % [monster.hp, monster.hp]
+
 func _on_player_died() -> void:
 	_log("[color=red]You died.[/color]")
-	action_button.text = "Start Expedition"
+	_set_expedition_view("world")
 
 func _on_item_obtained(item: ItemData, quantity: int) -> void:
 	_log("[color=gold]Drop: %s x%d[/color]" % [item.name, quantity])
 
 func _on_expedition_ended(_result: Dictionary) -> void:
-	action_button.text = "Start Expedition"
+	_set_expedition_view("world")
 
 func _log(text: String) -> void:
 	_log_lines.append(text)

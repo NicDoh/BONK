@@ -3,11 +3,13 @@ extends Node
 var items: Dictionary = {}
 var gear: Dictionary = {}
 var research: Dictionary = {}
+var zones: Dictionary = {}
 
 func _ready() -> void:
 	_load_directory("res://data/items/", items, ItemData)
 	_load_directory("res://data/gear/", gear, ItemData)
 	_load_directory("res://data/research/", research, ResearchData)
+	_load_directory("res://data/zones/", zones, ZoneData)
 
 func _load_directory(path: String, registry: Dictionary, type) -> void:
 	var dir := DirAccess.open(path)
@@ -34,3 +36,6 @@ func find_research(research_id: String) -> ResearchData:
 
 func get_all_research() -> Array:
 	return research.values()
+
+func get_all_zones() -> Array:
+	return zones.values()

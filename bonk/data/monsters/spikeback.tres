@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MonsterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/MonsterData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "spikeback"
+name = "Spikeback"
+description = "A small spiny creature. Approach with caution."
+hp = 12
+strength = 1
+defense = 4
+speed = 1
+accuracy = 6
+multiplier_blunt = 0.5
+multiplier_slash = 1.5

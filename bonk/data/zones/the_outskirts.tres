@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="ZoneData" load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://resources/ZoneData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/ZoneMonsterEntry.gd" id="2"]
+[ext_resource type="Resource" path="res://data/monsters/spikeback.tres" id="3"]
+[ext_resource type="Resource" path="res://data/monsters/skitternut.tres" id="4"]
+[ext_resource type="Resource" path="res://data/monsters/bluedart.tres" id="5"]
+
+[sub_resource type="Resource" id="Entry_spikeback"]
+script = ExtResource("2")
+monster = ExtResource("3")
+weight = 1.0
+
+[sub_resource type="Resource" id="Entry_skitternut"]
+script = ExtResource("2")
+monster = ExtResource("4")
+weight = 1.5
+
+[sub_resource type="Resource" id="Entry_bluedart"]
+script = ExtResource("2")
+monster = ExtResource("5")
+weight = 0.7
+
+[resource]
+script = ExtResource("1")
+id = "the_outskirts"
+name = "The Outskirts"
+description = "Just beyond the tribe. Something always rustles in the grass."
+roam_monsters = Array[ExtResource("2")]([SubResource("Entry_spikeback"), SubResource("Entry_skitternut"), SubResource("Entry_bluedart")])
+boss = null
+required_unlock = ""
