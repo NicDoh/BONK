@@ -1,3 +1,4 @@
+class_name CharacterScreen
 extends ScrollContainer
 
 var _stats_label: Label

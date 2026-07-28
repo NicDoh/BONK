@@ -1,3 +1,4 @@
+class_name TribeScreen
 extends ScrollContainer
 
 signal navigate_to(screen_id: String)

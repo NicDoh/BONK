@@ -1,3 +1,4 @@
+class_name ThinkeryScreen
 extends ScrollContainer
 
 signal navigate_to(screen_id: String)

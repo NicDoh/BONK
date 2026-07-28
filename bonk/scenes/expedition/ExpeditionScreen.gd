@@ -1,3 +1,4 @@
+class_name ExpeditionScreen
 extends ScrollContainer
 
 var _view: String = "world"
