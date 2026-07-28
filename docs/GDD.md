@@ -742,6 +742,31 @@ Signals tilføjes løbende når nye systemer bygges. EventBus starter med kamp- 
 
 ---
 
+## Tasks og Quests
+
+### Tasks (Ogg's Hearth)
+Proceduregenererede fra skabeloner. Eksempler:
+- "Bring X stk [item]" — tilføjer et task-specifikt drop til monster drop-tabellen, kun mens tasken er aktiv, ikke guaranteed
+- "Dræb X [monster]"
+- "Overlev X hits uden at dø"
+
+Nye tasks dukker op løbende. Giver XP og simple rewards. Ingen narrative konsekvenser.
+
+Task-specifikke drops er kernen — det gør items meningsfulde selv om de ikke har andre funktioner, og jagten på en sjælden drop til en task er spændende.
+
+### Quests (på tværs af tribe'en)
+Håndskrevne, fortæller historien. En quest kan:
+- Starte hos én NPC (Ogg's Hearth)
+- Kræve research i Thinkery
+- Kræve crafting i Bonkery
+- Kræve et sjældent drop fra et specifikt monster
+
+Større rewards, låser nyt indhold op. Samarbejde på tværs af alle bygninger.
+
+Storyline og konkret quest-indhold designes når zoner og monstre er på plads.
+
+---
+
 ## ÅBNE DISKUSSIONSPUNKTER
 - [ ] Stat levelcap (99?)
 - [ ] Ogg's Hearth og NPC-system
@@ -751,6 +776,7 @@ Signals tilføjes løbende når nye systemer bygges. EventBus starter med kamp- 
 - [ ] Visuel stil
 - [ ] Spiltitel
 - [ ] Tattoos som prestigesystem — trigger ukendt (stat milestones, collection log, zone completion eller kombination). Vises visuelt på karakteren. Diskuteres til phase 3/8.
+- [ ] Storyline og narrative quests — designes når zoner og monstre er på plads
 - [ ] Portrait vs. landscape
 - [ ] Bygnings-level bonusser (alle bygninger — diskuteres når relevant)
 - [ ] Inventory-skærm navn (spillerens stash/loot)
