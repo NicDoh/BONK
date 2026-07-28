@@ -1,6 +1,39 @@
-[gd_resource type="Resource" script_class="MonsterData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="MonsterData" load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://resources/MonsterData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/DropEntry.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/bones.tres" id="3"]
+[ext_resource type="Resource" path="res://data/items/meat.tres" id="4"]
+[ext_resource type="Resource" path="res://data/items/spikes.tres" id="5"]
+[ext_resource type="Resource" path="res://data/items/needle.tres" id="6"]
+
+[sub_resource type="Resource" id="Drop_bones"]
+script = ExtResource("2")
+item = ExtResource("3")
+quantity_min = 1
+quantity_max = 1
+weight = 0.7
+
+[sub_resource type="Resource" id="Drop_meat"]
+script = ExtResource("2")
+item = ExtResource("4")
+quantity_min = 1
+quantity_max = 1
+weight = 0.5
+
+[sub_resource type="Resource" id="Drop_spikes"]
+script = ExtResource("2")
+item = ExtResource("5")
+quantity_min = 1
+quantity_max = 3
+weight = 1.0
+
+[sub_resource type="Resource" id="Drop_needle"]
+script = ExtResource("2")
+item = ExtResource("6")
+quantity_min = 1
+quantity_max = 1
+weight = 1.0
 
 [resource]
 script = ExtResource("1")
@@ -14,3 +47,8 @@ speed = 1
 accuracy = 6
 multiplier_blunt = 0.5
 multiplier_slash = 1.5
+drops_common = Array[ExtResource("2")]([SubResource("Drop_bones"), SubResource("Drop_meat")])
+rare_table_chance = 0.05
+drops_rare = Array[ExtResource("2")]([SubResource("Drop_spikes")])
+ultra_rare_table_chance = 0.005
+drops_ultra_rare = Array[ExtResource("2")]([SubResource("Drop_needle")])

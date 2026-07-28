@@ -1,6 +1,23 @@
-[gd_resource type="Resource" script_class="MonsterData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="MonsterData" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://resources/MonsterData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/DropEntry.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/feathers.tres" id="3"]
+[ext_resource type="Resource" path="res://data/items/meat.tres" id="4"]
+
+[sub_resource type="Resource" id="Drop_feathers"]
+script = ExtResource("2")
+item = ExtResource("3")
+quantity_min = 1
+quantity_max = 3
+weight = 1.2
+
+[sub_resource type="Resource" id="Drop_meat"]
+script = ExtResource("2")
+item = ExtResource("4")
+quantity_min = 1
+quantity_max = 1
+weight = 0.8
 
 [resource]
 script = ExtResource("1")
@@ -12,3 +29,4 @@ strength = 2
 defense = 1
 speed = 6
 accuracy = 8
+drops_common = Array[ExtResource("2")]([SubResource("Drop_feathers"), SubResource("Drop_meat")])

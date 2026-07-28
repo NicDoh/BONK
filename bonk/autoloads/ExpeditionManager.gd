@@ -128,18 +128,48 @@ func _on_player_died() -> void:
 	EventBus.expedition_ended.emit({"reason": "died"})
 
 func _roll_drops() -> void:
-	for entry in current_monster.drops:
-		var drop_bonus := 0.0
-		if CharacterManager.equipped_main_hand:
-			drop_bonus = CharacterManager.equipped_main_hand.bonus_drop_chance
-		if CharacterManager.equipped_off_hand:
-			drop_bonus += CharacterManager.equipped_off_hand.bonus_drop_chance
+	var drop_bonus := 0.0
+	if CharacterManager.equipped_main_hand:
+		drop_bonus = CharacterManager.equipped_main_hand.bonus_drop_chance
+	if CharacterManager.equipped_off_hand:
+		drop_bonus += CharacterManager.equipped_off_hand.bonus_drop_chance
 
-		var roll := randf()
-		var adjusted_weight := entry.weight * (1.0 + drop_bonus)
-		if roll < adjusted_weight:
-			var qty := randi_range(entry.quantity_min, entry.quantity_max)
-			InventoryManager.add_item(entry.item, qty)
+	for e in current_monster.drops_guaranteed:
+		var qty := randi_range(e.quantity_min, e.quantity_max)
+		InventoryManager.add_item(e.item, qty)
+
+	_roll_common_table(current_monster.drops_common, drop_bonus)
+
+	if current_monster.rare_table_chance > 0.0:
+		_roll_single_table(current_monster.drops_rare, current_monster.rare_table_chance, drop_bonus)
+
+	if current_monster.ultra_rare_table_chance > 0.0:
+		_roll_single_table(current_monster.drops_ultra_rare, current_monster.ultra_rare_table_chance, 0.0)
+
+func _roll_common_table(entries: Array[DropEntry], drop_bonus: float) -> void:
+	if entries.is_empty():
+		return
+	var total := 0.0
+	for e in entries:
+		total += e.weight * (1.0 + drop_bonus)
+	var roll := randf() * total
+	var cumulative := 0.0
+	for e in entries:
+		cumulative += e.weight * (1.0 + drop_bonus)
+		if roll <= cumulative:
+			var qty := randi_range(e.quantity_min, e.quantity_max)
+			InventoryManager.add_item(e.item, qty)
+			return
+
+func _roll_single_table(entries: Array[DropEntry], table_chance: float, drop_bonus: float) -> void:
+	if entries.is_empty():
+		return
+	if randf() > table_chance * (1.0 + drop_bonus):
+		return
+	for e in entries:
+		if randf() < e.weight:
+			var qty := randi_range(e.quantity_min, e.quantity_max)
+			InventoryManager.add_item(e.item, qty)
 
 func _grant_weapon_xp(damage: int) -> void:
 	if not CharacterManager.equipped_main_hand:

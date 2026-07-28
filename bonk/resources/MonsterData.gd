@@ -25,4 +25,9 @@ enum DamageType { BLUNT, SLASH, PIERCE, FIRE, POISON, SPIRIT }
 @export var multiplier_poison: float = 1.0
 @export var multiplier_spirit: float = 1.0
 
-@export var drops: Array[DropEntry] = []
+@export var drops_guaranteed: Array[DropEntry] = []
+@export var drops_common: Array[DropEntry] = []
+@export var rare_table_chance: float = 0.0
+@export var drops_rare: Array[DropEntry] = []
+@export var ultra_rare_table_chance: float = 0.0
+@export var drops_ultra_rare: Array[DropEntry] = []

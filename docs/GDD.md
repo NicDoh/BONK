@@ -309,7 +309,13 @@ id, name, description, portrait, is_boss
 Stats: hp, strength, defense, speed, accuracy
 attack_damage_type: DamageType
 Damage matrix: multiplier_blunt/slash/pierce/fire/poison/spirit (float)
-drops: Array[DropEntry]  → { item: ItemData, min, max, chance }
+drops_guaranteed: Array[DropEntry]   → altid drop, ingen roll
+drops_common: Array[DropEntry]       → pick one per kill via vægte
+drops_rare: Array[DropEntry]         → aktiveres med rare_table_chance, alle entries rulles uafhængigt
+drops_ultra_rare: Array[DropEntry]   → aktiveres med ultra_rare_table_chance, alle entries rulles uafhængigt
+
+**Planlagt: Set drop protection**
+Nogle rare drops tilhører et "sæt" (f.eks. 3 dele til ét våben). Systemet tracker hvilke dele spilleren har fået og udelukker allerede-fundne fra tabellen — indtil hele sættet er komplet, hvorefter alle dele igen er tilgængelige. Kræver Collection Log integration.
 ```
 
 ### PetData
@@ -512,7 +518,27 @@ Alle bygningers level-bonusser designes grundigt når de er relevante — intet 
 
 ---
 
-## 8. Progression & Endgame
+## 8. Gear Tiers
+
+Gear følger et tier-system hvor materialet definerer styrken. Tiers tilføjes løbende — arkitekturen understøtter ubegrænsede tiers via `tier: int` på GearData.
+
+### Kendte tiers (foreløbig rækkefølge)
+| Tier | Materiale | Vibe |
+|------|-----------|------|
+| 0 | Bone | Primitiv, første gear |
+| 1 | Flint | Skarpere, stadig råt |
+| 2 | Copper | Første metal |
+| ... | ... | ... |
+| ? | Crystal | Begynder at blive mytisk |
+| ? | Spirit | Overnaturligt |
+| ? | Ancient | Forfædres arv |
+| ? | Astral | Endgame, kosmisk |
+
+Unikke items følger ikke nødvendigvis tier-systemet.
+
+---
+
+## 9. Progression & Endgame
 
 ### Tidlig spil
 - Forest zone, Roam mode, byg Forge og Camp
