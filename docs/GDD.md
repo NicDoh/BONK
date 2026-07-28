@@ -777,6 +777,11 @@ Storyline og konkret quest-indhold designes når zoner og monstre er på plads.
 - [ ] Spiltitel
 - [ ] Tattoos som prestigesystem — trigger ukendt (stat milestones, collection log, zone completion eller kombination). Vises visuelt på karakteren. Diskuteres til phase 3/8.
 - [ ] Storyline og narrative quests — designes når zoner og monstre er på plads
+
+## Verdens-præmis (besluttet)
+De allerførste proto-mennesker. Ogg har altid klaret det — men han er nu for gammel. Spilleren er den første der nogensinde er taget ud alene. Stammen ved ikke hvad der er derude.
+
+**Ogg:** Selvudnævnt visdomsmand. Hans hints er halvt forkerte, hans historier modsigende. Ikke så smart som han tror, og doven. Giver stammen humor og forklarer hvorfor spilleren selv må finde ud af alt. Andre NPC'er der unlockes undervejs er klogere — og mere ærlige om det.
 - [ ] Portrait vs. landscape
 - [ ] Bygnings-level bonusser (alle bygninger — diskuteres når relevant)
 - [ ] Inventory-skærm navn (spillerens stash/loot)
