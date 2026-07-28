@@ -19,6 +19,43 @@ GDD færdiggjort med alle arkitektur-kritiske systemer besluttet:
 - Pets (aktivt pet kæmper + XP, inaktive giver passive bonusser)
 - EventBus arkitektur besluttet
 
+## 2026-07-28 — Session 4: Navigation, zoner og drops
+
+### Navigation
+- Main.gd omskrevet til multi-screen navigation: Expedition, Character, Tribe, Bonkery, Thinkery
+- Expedition-skærm har tre views: world (zoneliste), zone (aktiviteter), combat
+- CharacterManager.deserialize rettede bug: gear blev ikke gendannet ved load
+
+### Zone-system
+- ZoneData resource: id, name, description, roam_monsters (Array[ZoneMonsterEntry]), boss, required_unlock
+- ZoneMonsterEntry resource: monster + weight (til vægtbaseret tilfældig spawning)
+- ResourceRegistry loader nu zoner fra res://data/zones/
+- ExpeditionManager tager nu ZoneData i stedet for enkelt monster, picker tilfældig monster via vægte
+- EventBus: monster_spawned signal tilføjet
+- Første zone: The Outskirts med fire monstre
+
+### Drop-system
+- MonsterData fik tre separate drop tables: drops_guaranteed, drops_common, drops_rare, drops_ultra_rare
+- drops_guaranteed: altid drop, ingen roll
+- drops_common: pick one per kill via vægte
+- drops_rare: aktiveres med rare_table_chance, hvert entry rulles uafhængigt
+- drops_ultra_rare: aktiveres med ultra_rare_table_chance, hvert entry rulles uafhængigt
+- GameManager offline progress opdateret til nye tabeller
+- Planlagt: set drop protection (bad luck mitigation for item-sæt)
+
+### Monstre — The Outskirts
+- Spikeback (pindsvin): Bones/Meat common, Spikes rare, Needle ultra rare
+- Skitternut (egern): Meat/Bones/Hide common, Golden Acorn rare
+- Bluedart (roller-fugl): Feathers/Meat common
+- Tangler (edderkop): Thread guaranteed, Silk Gland common, Venom Sac rare
+
+### Items oprettet
+Meat, Feathers, Spikes, Needle, Golden Acorn, Thread, Silk Gland, Venom Sac
+
+### Gear tiers besluttet
+Bone → Flint → Copper → ... → Crystal → Spirit → Ancient → Astral
+GearData fik tier: int felt
+
 ### Næste skridt
 - Opret Godot-projekt
 - Sæt mappestruktur op

@@ -50,17 +50,22 @@
 
 ---
 
-## FASE 3 — Progression og opdagelse
+## FASE 3 — Progression og opdagelse ⬜ (delvist)
 *Mål: Spillet føles som en reel progression med formål*
 
+- [x] Multi-screen navigation (Expedition, Character, Tribe, Bonkery, Thinkery)
+- [x] Zone-system med drill-down UI (world → zone → combat)
+- [x] Vægtbaseret monster-spawning per zone
+- [x] Tre-tabel drop-system (guaranteed, common, rare, ultra rare)
+- [x] The Outskirts — første zone med 4 monstre og drops
+- [x] Gear tier-system (tier: int på GearData, progression besluttet)
 - [ ] Target Hunt mode
 - [ ] Boss Run mode
-- [ ] Scouting system (Watchtower)
+- [ ] Scouting system (Scoutery)
 - [ ] Research Center — kategorier og progressiv afsløring
-- [ ] Forsker-NPC i Camp
-- [ ] Offline progress — beregning og summary-skærm
-- [ ] Offline cap — starter på 0, unlockes via Research
+- [ ] Forsker-NPC i Ogg's Hearth
 - [ ] Inventory sorting
+- [ ] Set drop protection (bad luck mitigation for item-sæt)
 - [ ] **Test: progression føles meningsfuld over flere sessioner**
 
 ---
