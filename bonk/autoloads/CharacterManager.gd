@@ -123,8 +123,16 @@ func serialize() -> Dictionary:
 	}
 
 func deserialize(data: Dictionary) -> void:
-	stats = data["stats"]
-	current_hp = data["current_hp"]
+	var loaded: Dictionary = data.get("stats", {})
+	# Migrate old stat keys from before the constitution/speed rename
+	if loaded.has("hp") and not loaded.has("constitution"):
+		loaded["constitution"] = loaded["hp"]
+	loaded.erase("hp")
+	loaded.erase("speed")
+	for key in stats:
+		if loaded.has(key):
+			stats[key] = loaded[key]
+	current_hp = data.get("current_hp", max_hp)
 	equipped = {}
 	for slot_str in data.get("equipped", {}):
 		var item_id: String = data["equipped"][slot_str]

@@ -45,6 +45,7 @@ strength = 1
 defense = 1
 speed = 8
 accuracy = 10
+attack_damage_type = 1
 drops_common = Array[ExtResource("2")]([SubResource("Drop_meat"), SubResource("Drop_bones"), SubResource("Drop_hide")])
 rare_table_chance = 0.02
 drops_rare = Array[ExtResource("2")]([SubResource("Drop_golden_acorn")])

@@ -13,4 +13,5 @@ max_stack = 1
 tier = 0
 slot = 5
 defense = 1
+speed_modifier = -0.15
 resistances = {"blunt": 0.05, "slash": 0.05, "pierce": 0.05}

@@ -37,6 +37,7 @@ strength = 2
 defense = 1
 speed = 4
 accuracy = 7
+attack_damage_type = 4
 drops_guaranteed = Array[ExtResource("2")]([SubResource("Drop_thread")])
 drops_common = Array[ExtResource("2")]([SubResource("Drop_silk_gland")])
 rare_table_chance = 0.05

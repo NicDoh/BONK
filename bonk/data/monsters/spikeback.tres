@@ -45,6 +45,7 @@ strength = 1
 defense = 4
 speed = 1
 accuracy = 6
+attack_damage_type = 2
 multiplier_blunt = 0.5
 multiplier_slash = 1.5
 drops_common = Array[ExtResource("2")]([SubResource("Drop_bones"), SubResource("Drop_meat")])

@@ -1,24 +1,24 @@
-[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=8 format=3 uid="uid://drbcdvwp4bu07"]
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=7 format=3 uid="uid://drbcdvwp4bu07"]
 
 [ext_resource type="Script" uid="uid://dc4e8e5wbj6mj" path="res://resources/CraftingIngredient.gd" id="1_8vha4"]
 [ext_resource type="Script" uid="uid://mx61ai4t8bb8" path="res://resources/CraftingRecipe.gd" id="2_c6gii"]
-[ext_resource type="ItemData" path="res://data/items/bones.tres" id="2_t5or0"]
-[ext_resource type="ItemData" path="res://data/items/hide.tres" id="3_4ngfj"]
-[ext_resource type="Resource" path="res://data/gear/bone_club.tres" id="4_v2j85"]
+[ext_resource type="Resource" path="res://data/items/carved_bone.tres" id="3_cb"]
+[ext_resource type="Resource" path="res://data/items/hide.tres" id="4_hd"]
+[ext_resource type="Resource" path="res://data/gear/bone_club.tres" id="5_v2j85"]
 
-[sub_resource type="Resource" id="Resource_w6wfy"]
+[sub_resource type="Resource" id="Ing_carved_bone"]
 script = ExtResource("1_8vha4")
-item = ExtResource("2_t5or0")
-metadata/_custom_type_script = "uid://dc4e8e5wbj6mj"
+item = ExtResource("3_cb")
+quantity = 2
 
-[sub_resource type="Resource" id="Resource_3e8a4"]
+[sub_resource type="Resource" id="Ing_hide"]
 script = ExtResource("1_8vha4")
-item = ExtResource("3_4ngfj")
-metadata/_custom_type_script = "uid://dc4e8e5wbj6mj"
+item = ExtResource("4_hd")
+quantity = 1
 
 [resource]
 script = ExtResource("2_c6gii")
 id = "bone_club"
-result_item = ExtResource("4_v2j85")
-ingredients = Array[ExtResource("1_8vha4")]([SubResource("Resource_w6wfy"), SubResource("Resource_3e8a4")])
+result_item = ExtResource("5_v2j85")
+ingredients = Array[ExtResource("1_8vha4")]([SubResource("Ing_carved_bone"), SubResource("Ing_hide")])
 required_building_level = 0

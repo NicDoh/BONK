@@ -13,4 +13,5 @@ max_stack = 1
 tier = 0
 slot = 6
 defense = 1
+accuracy_bonus = 1
 resistances = {"blunt": 0.15, "slash": -0.1}

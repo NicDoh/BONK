@@ -29,4 +29,5 @@ strength = 2
 defense = 1
 speed = 6
 accuracy = 8
+attack_damage_type = 2
 drops_common = Array[ExtResource("2")]([SubResource("Drop_feathers"), SubResource("Drop_meat")])

@@ -39,6 +39,35 @@
 ### Bugfix
 - InventoryManager: `get_quantity`, `has_item` og `remove_item` håndterede ikke non-stackable items korrekt (brugte item.id som slot key, men non-stackable items gemmes med unik slot key). Alle tre funktioner itererer nu alle slots.
 
+## 2026-07-29 — Session 6: Stat/gear-system overhaul + cleanup
+
+### Stat og gear-system overhaul
+- GearData felter omskrevet: damage, attack_interval, defense, bonus_hp, speed_modifier, accuracy_bonus, bonus_drop_chance, resistances (Dictionary)
+- Fjernede bonus_strength, bonus_speed, bonus_accuracy, 6 separate resistance-felter
+- CharacterManager omskrevet: constitution (tidl. hp), speed fjernet som stat
+- Multiplikator-formel: `1.0 + sqrt(level-1) * 0.33` — gear giver flat stats, levels er multiplikatorer
+- Max HP = constitution_level × 10 + sum(bonus_hp fra gear)
+- Attack interval er rent gear-baseret (weapon.attack_interval + sum(speed_modifier), min 0.3s)
+- ExpeditionManager combat-formler opdateret til nyt system
+- Alle 23 gear .tres-filer migreret til nyt schema
+
+### Monster attack types sat korrekt
+- Skitternut: SLASH (1) — klør/ridser
+- Bluedart: PIERCE (2) — næbsdyk
+- Spikeback: PIERCE (2) — spidser
+- Tangler: POISON (4) — gift, dropper Venom Sac
+
+### Gear-bonusser gendannet
+- Bone/Leather Gloves: accuracy_bonus = 1
+- Leather Boots: speed_modifier = -0.1
+- Reinforced Boots: speed_modifier = -0.15
+
+### Bone Club recipe opdateret
+- Kræver nu 2x Carved Bone + 1x Hide (i stedet for raw Bones)
+
+### Save-kompatibilitet
+- CharacterManager.deserialize migrerer automatisk gamle "hp" → "constitution", fjerner "speed"
+
 ## 2026-07-29 — Session 5 fortsat: Crude-tier armor komplettering
 
 ### Crude-tier armor
