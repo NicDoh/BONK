@@ -2,13 +2,14 @@ extends Node
 
 const XP_PER_LEVEL_BASE: float = 100.0
 const XP_SCALING: float = 1.15
+const BARE_HANDS_DAMAGE: int = 2
+const BARE_HANDS_INTERVAL: float = 2.0
 
 var stats: Dictionary = {
-	"hp":       {"level": 1, "xp": 0.0},
-	"strength": {"level": 1, "xp": 0.0},
-	"defense":  {"level": 1, "xp": 0.0},
-	"speed":    {"level": 1, "xp": 0.0},
-	"accuracy": {"level": 1, "xp": 0.0},
+	"strength":    {"level": 1, "xp": 0.0},
+	"defense":     {"level": 1, "xp": 0.0},
+	"constitution":{"level": 1, "xp": 0.0},
+	"accuracy":    {"level": 1, "xp": 0.0},
 }
 
 var current_hp: int = 0
@@ -46,20 +47,52 @@ func get_level(stat_name: String) -> int:
 func get_equipped(slot: GearData.Slot) -> GearData:
 	return equipped.get(slot, null)
 
-func get_effective_stat(stat_name: String) -> int:
-	var base := get_level(stat_name)
-	var bonus := 0
+func get_multiplier(stat_name: String) -> float:
+	return 1.0 + sqrt(max(get_level(stat_name) - 1, 0)) * 0.33
+
+func get_weapon_damage() -> int:
+	var weapon := get_equipped(GearData.Slot.WEAPON)
+	var base := weapon.damage if weapon else BARE_HANDS_DAMAGE
+	return roundi(base * get_multiplier("strength"))
+
+func get_total_defense() -> int:
+	var total := 0
 	for gear in equipped.values():
-		match stat_name:
-			"strength": bonus += gear.bonus_strength
-			"speed":    bonus += gear.bonus_speed
-			"accuracy": bonus += gear.bonus_accuracy
-			"hp":       bonus += gear.bonus_hp
-			"defense":  bonus += gear.bonus_defense
-	return base + bonus
+		total += gear.defense
+	return roundi(total * get_multiplier("defense"))
+
+func get_attack_interval() -> float:
+	var weapon := get_equipped(GearData.Slot.WEAPON)
+	var base := weapon.attack_interval if weapon else BARE_HANDS_INTERVAL
+	var modifier := 0.0
+	for gear in equipped.values():
+		modifier += gear.speed_modifier
+	return maxf(0.3, base + modifier)
+
+func get_total_accuracy() -> int:
+	var base := get_level("accuracy")
+	for gear in equipped.values():
+		base += gear.accuracy_bonus
+	return base
+
+func get_resistance(damage_type: GearData.DamageType) -> float:
+	var key := GearData.DamageType.keys()[damage_type].to_lower()
+	var total := 0.0
+	for gear in equipped.values():
+		total += gear.resistances.get(key, 0.0)
+	return clampf(total, -1.0, 0.9)
+
+func get_total_drop_bonus() -> float:
+	var bonus := 0.0
+	for gear in equipped.values():
+		bonus += gear.bonus_drop_chance
+	return bonus
 
 func recalculate_max_hp() -> void:
-	max_hp = get_effective_stat("hp") * 10
+	var bonus_hp := 0
+	for gear in equipped.values():
+		bonus_hp += gear.bonus_hp
+	max_hp = get_level("constitution") * 10 + bonus_hp
 	current_hp = mini(current_hp, max_hp)
 
 func take_damage(amount: int) -> void:
@@ -78,24 +111,6 @@ func equip(gear: GearData) -> void:
 func unequip(slot: GearData.Slot) -> void:
 	equipped.erase(slot)
 	recalculate_max_hp()
-
-func get_resistance(damage_type: GearData.DamageType) -> float:
-	var total := 0.0
-	for gear in equipped.values():
-		match damage_type:
-			GearData.DamageType.BLUNT:   total += gear.resistance_blunt
-			GearData.DamageType.SLASH:   total += gear.resistance_slash
-			GearData.DamageType.PIERCE:  total += gear.resistance_pierce
-			GearData.DamageType.FIRE:    total += gear.resistance_fire
-			GearData.DamageType.POISON:  total += gear.resistance_poison
-			GearData.DamageType.SPIRIT:  total += gear.resistance_spirit
-	return clampf(total, -1.0, 0.9)
-
-func get_total_drop_bonus() -> float:
-	var bonus := 0.0
-	for gear in equipped.values():
-		bonus += gear.bonus_drop_chance
-	return bonus
 
 func serialize() -> Dictionary:
 	var equipped_data := {}

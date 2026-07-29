@@ -72,31 +72,27 @@ func _weighted_random(entries: Array[ZoneMonsterEntry]) -> MonsterData:
 	return entries[-1].monster
 
 func _player_attack() -> void:
-	var accuracy := CharacterManager.get_effective_stat("accuracy")
-	var hit_chance := clampf(accuracy / float(accuracy + current_monster.defense) , 0.05, 0.95)
+	var accuracy := CharacterManager.get_total_accuracy()
+	var hit_chance := clampf(accuracy / float(accuracy + current_monster.defense), 0.05, 0.95)
 
 	if randf() > hit_chance:
 		EventBus.player_missed.emit()
 		return
 
-	var strength := CharacterManager.get_effective_stat("strength")
-	var damage := maxi(1, strength - current_monster.defense / 2)
+	var damage := maxi(1, CharacterManager.get_weapon_damage() - current_monster.defense / 2)
 	var multiplier := _get_damage_multiplier()
 	var final_damage := int(damage * multiplier)
 
 	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
-	var damage_type := GearData.DamageType.BLUNT
-	if weapon:
-		damage_type = weapon.damage_type
+	var damage_type := weapon.damage_type if weapon else GearData.DamageType.BLUNT
 
 	_monster_hp -= final_damage
 	EventBus.player_hit_monster.emit(final_damage, damage_type, multiplier)
-
 	_grant_weapon_xp(final_damage)
 
 func _monster_attack() -> void:
 	var monster_acc := current_monster.accuracy
-	var player_def := CharacterManager.get_effective_stat("defense")
+	var player_def := CharacterManager.get_total_defense()
 	var hit_chance := clampf(monster_acc / float(monster_acc + player_def), 0.05, 0.95)
 
 	if randf() > hit_chance:
@@ -118,7 +114,7 @@ func _monster_attack() -> void:
 	var final_damage := maxi(1, int(damage * (1.0 - resistance)))
 	CharacterManager.take_damage(final_damage)
 	EventBus.monster_hit_player.emit(final_damage)
-	CharacterManager.gain_xp("hp", float(final_damage) * 0.5)
+	CharacterManager.gain_xp("constitution", float(final_damage) * 0.5)
 
 func _on_monster_died() -> void:
 	EventBus.monster_died.emit(current_monster)
@@ -172,17 +168,9 @@ func _roll_single_table(entries: Array[DropEntry], table_chance: float, drop_bon
 			InventoryManager.add_item(e.item, qty)
 
 func _grant_weapon_xp(damage: int) -> void:
-	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
-	if not weapon:
-		CharacterManager.gain_xp("strength", float(damage) * 5.0)
-		CharacterManager.gain_xp("speed", float(damage) * 2.5)
-		CharacterManager.gain_xp("accuracy", float(damage) * 2.5)
-		return
-
 	var xp := float(damage) * 10.0
-	CharacterManager.gain_xp("strength", xp * 0.5)
-	CharacterManager.gain_xp("speed", xp * 0.25)
-	CharacterManager.gain_xp("accuracy", xp * 0.25)
+	CharacterManager.gain_xp("strength", xp * 0.6)
+	CharacterManager.gain_xp("accuracy", xp * 0.4)
 
 func _get_damage_multiplier() -> float:
 	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
@@ -198,8 +186,7 @@ func _get_damage_multiplier() -> float:
 	return 1.0
 
 func _get_player_tick_interval() -> float:
-	var speed := CharacterManager.get_effective_stat("speed")
-	return clampf(3.0 - (speed * 0.05), 0.5, 3.0)
+	return CharacterManager.get_attack_interval()
 
 func _get_monster_tick_interval() -> float:
 	if not current_monster:
@@ -210,7 +197,7 @@ func apply_offline_progress(elapsed: float) -> Dictionary:
 	if not current_monster:
 		return {}
 
-	var avg_damage := maxi(1, CharacterManager.get_effective_stat("strength") - current_monster.defense / 2)
+	var avg_damage := maxi(1, CharacterManager.get_weapon_damage() - current_monster.defense / 2)
 	var ticks_per_kill := ceili(float(current_monster.hp) / float(avg_damage))
 	var time_per_kill := ticks_per_kill * _get_player_tick_interval()
 	var kills := int(elapsed / time_per_kill)
@@ -226,9 +213,8 @@ func apply_offline_progress(elapsed: float) -> Dictionary:
 			drops_summary[item_name] = drops_summary.get(item_name, 0) + results[item_name]
 
 	var xp_per_kill := float(avg_damage * ticks_per_kill)
-	CharacterManager.gain_xp("strength", xp_per_kill * kills * 0.5)
-	CharacterManager.gain_xp("speed", xp_per_kill * kills * 0.25)
-	CharacterManager.gain_xp("accuracy", xp_per_kill * kills * 0.25)
+	CharacterManager.gain_xp("strength", xp_per_kill * kills * 0.6)
+	CharacterManager.gain_xp("accuracy", xp_per_kill * kills * 0.4)
 
 	return {"kills": kills, "elapsed": elapsed, "drops": drops_summary}
 
