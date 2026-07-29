@@ -54,19 +54,22 @@ func get_level(stat_name: String) -> int:
 func get_equipped(slot: GearData.Slot) -> GearData:
 	return equipped.get(slot, null)
 
-func get_multiplier(stat_name: String) -> float:
-	return 1.0 + get_level(stat_name) * 0.1
+func get_total_strength() -> int:
+	var total := get_level("strength")
+	for gear in equipped.values():
+		total += gear.strength_bonus
+	return total
 
 func get_weapon_damage() -> int:
 	var weapon := get_equipped(GearData.Slot.WEAPON)
 	var base := weapon.damage if weapon else BARE_HANDS_DAMAGE
-	return roundi(base * get_multiplier("strength"))
+	return roundi(float(base) * (1.0 + float(get_total_strength()) / 100.0))
 
 func get_total_defense() -> int:
-	var total := 0
+	var total := get_level("defense")
 	for gear in equipped.values():
 		total += gear.defense
-	return roundi(total * get_multiplier("defense"))
+	return total
 
 func get_attack_interval() -> float:
 	var weapon := get_equipped(GearData.Slot.WEAPON)

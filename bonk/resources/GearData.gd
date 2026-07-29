@@ -18,6 +18,7 @@ enum DamageType { BLUNT, SLASH, PIERCE, FIRE, POISON, SPIRIT }
 @export var bonus_hp: int = 0
 @export var speed_modifier: float = 0.0
 @export var accuracy_bonus: int = 0
+@export var strength_bonus: int = 0
 @export var bonus_drop_chance: float = 0.0
 
 # Resistances: keys are lowercase damage type names ("blunt", "slash", etc.)

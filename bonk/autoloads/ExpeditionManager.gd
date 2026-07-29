@@ -71,44 +71,81 @@ func _weighted_random(entries: Array[ZoneMonsterEntry]) -> MonsterData:
 			return e.monster
 	return entries[-1].monster
 
-func _player_attack() -> void:
-	var accuracy := CharacterManager.get_total_accuracy()
-	var hit_chance := clampf(accuracy / float(accuracy + current_monster.defense), 0.05, 0.95)
+# --- Combat formula constants ---
+const MISS_MAX    := 0.20
+const MISS_K      := 1.0
+const MISS_P      := 1.3
+const CRIT_BASE   := 0.02
+const CRIT_BONUS  := 0.21
+const CRIT_K      := 3.0
+const CRIT_P      := 1.5
+const CRIT_MULT   := 1.2
+const RED_MAX     := 0.90
+const RED_K       := 3.5
+const RED_P       := 1.5
+const ROLL_BASE   := 0.85
+const ROLL_K      := 25.0
 
-	if randf() > hit_chance:
+func _hit_chance(attacker_acc: float, defender_def: float) -> float:
+	if defender_def <= 0.0:
+		return 1.0
+	var r := attacker_acc / defender_def
+	return 1.0 - MISS_MAX * (MISS_K / (MISS_K + pow(r, MISS_P)))
+
+func _crit_chance(accuracy: float, defense: float) -> float:
+	if defense <= 0.0:
+		return CRIT_BASE + CRIT_BONUS
+	var r := accuracy / defense
+	var rp := pow(r, CRIT_P)
+	return CRIT_BASE + CRIT_BONUS * (rp / (CRIT_K + rp))
+
+func _damage_reduction(defender_def: float, attacker_acc: float) -> float:
+	if attacker_acc <= 0.0:
+		return RED_MAX
+	var r := defender_def / attacker_acc
+	var rp := pow(r, RED_P)
+	return RED_MAX * (rp / (RED_K + rp))
+
+func _damage_roll(base: float, accuracy: float) -> int:
+	var exponent := ROLL_BASE / (1.0 + accuracy / ROLL_K)
+	return maxi(1, ceili(base * pow(randf(), exponent)))
+
+func _player_attack() -> void:
+	var accuracy := float(CharacterManager.get_total_accuracy())
+	var defense  := float(current_monster.defense)
+
+	if randf() > _hit_chance(accuracy, defense):
 		EventBus.player_missed.emit()
 		return
 
-	var damage := maxi(1, CharacterManager.get_weapon_damage() - current_monster.defense / 2)
-	var multiplier := _get_damage_multiplier()
-	var final_damage := int(damage * multiplier)
-
+	var type_mult := _get_damage_multiplier()
+	var base_damage := float(CharacterManager.get_weapon_damage()) * type_mult
 	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
 	var damage_type := weapon.damage_type if weapon else GearData.DamageType.BLUNT
 
+	var final_damage: int
+	if randf() < _crit_chance(accuracy, defense):
+		final_damage = maxi(1, ceili(base_damage * CRIT_MULT))
+		EventBus.player_hit_monster.emit(final_damage, damage_type, CRIT_MULT)
+	else:
+		final_damage = _damage_roll(base_damage, accuracy)
+		EventBus.player_hit_monster.emit(final_damage, damage_type, 1.0)
+
 	_monster_hp -= final_damage
-	EventBus.player_hit_monster.emit(final_damage, damage_type, multiplier)
 
 func _monster_attack() -> void:
-	var monster_acc := current_monster.accuracy
-	var player_def := CharacterManager.get_total_defense()
-	var hit_chance := clampf(monster_acc / float(monster_acc + player_def), 0.05, 0.95)
+	var mon_acc  := float(current_monster.accuracy)
+	var player_def := float(CharacterManager.get_total_defense())
 
-	if randf() > hit_chance:
+	if randf() > _hit_chance(mon_acc, player_def):
 		EventBus.monster_missed.emit()
 		return
 
-	var damage := maxi(1, current_monster.strength - player_def / 2)
-
-	var shield := CharacterManager.get_equipped(GearData.Slot.SHIELD)
-	if shield:
-		var block_chance := clampf(player_def / float(player_def + current_monster.strength), 0.0, 0.6)
-		if randf() < block_chance:
-			EventBus.player_blocked.emit(damage)
-			return
-
+	var raw := _damage_roll(float(current_monster.strength), mon_acc)
+	var reduction := _damage_reduction(player_def, mon_acc)
 	var resistance := CharacterManager.get_resistance(current_monster.attack_damage_type)
-	var final_damage := maxi(1, int(damage * (1.0 - resistance)))
+	var final_damage := maxi(1, int(float(raw) * (1.0 - reduction) * (1.0 - resistance)))
+
 	CharacterManager.take_damage(final_damage)
 	EventBus.monster_hit_player.emit(final_damage)
 
@@ -190,7 +227,13 @@ func apply_offline_progress(elapsed: float) -> Dictionary:
 	if not current_monster:
 		return {}
 
-	var avg_damage := maxi(1, CharacterManager.get_weapon_damage() - current_monster.defense / 2)
+	var accuracy    := float(CharacterManager.get_total_accuracy())
+	var defense     := float(current_monster.defense)
+	var base_damage := float(CharacterManager.get_weapon_damage()) * _get_damage_multiplier()
+	var hit_ch      := _hit_chance(accuracy, defense)
+	var roll_exp    := ROLL_BASE / (1.0 + accuracy / ROLL_K)
+	var avg_roll    := 1.0 / (1.0 + roll_exp)
+	var avg_damage  := maxi(1, int(base_damage * hit_ch * avg_roll))
 	var ticks_per_kill := ceili(float(current_monster.hp) / float(avg_damage))
 	var time_per_kill := ticks_per_kill * _get_player_tick_interval()
 	var kills := int(elapsed / time_per_kill)
