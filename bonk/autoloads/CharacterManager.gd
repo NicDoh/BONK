@@ -86,7 +86,7 @@ func get_total_accuracy() -> int:
 	return base
 
 func get_resistance(damage_type: GearData.DamageType) -> float:
-	var key := GearData.DamageType.keys()[damage_type].to_lower()
+	var key := (GearData.DamageType.keys()[damage_type] as String).to_lower()
 	var total := 0.0
 	for gear in equipped.values():
 		total += gear.resistances.get(key, 0.0)
