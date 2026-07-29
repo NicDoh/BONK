@@ -29,6 +29,7 @@ ResearchManager="*res://autoloads/ResearchManager.gd"
 CollectionLogManager="*res://autoloads/CollectionLogManager.gd"
 PetManager="*res://autoloads/PetManager.gd"
 CraftingManager="*res://autoloads/CraftingManager.gd"
+RefineryManager="*res://autoloads/RefineryManager.gd"
 
 [rendering]
 

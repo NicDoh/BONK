@@ -10,6 +10,7 @@ func save() -> void:
 		"expedition": ExpeditionManager.serialize(),
 		"city": CityManager.serialize(),
 		"research": ResearchManager.serialize(),
+		"refinery": RefineryManager.serialize(),
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
@@ -39,6 +40,8 @@ func load_save() -> void:
 		ResearchManager.deserialize(data["research"])
 	if data.has("expedition"):
 		ExpeditionManager.deserialize(data["expedition"])
+	if data.has("refinery"):
+		RefineryManager.deserialize(data["refinery"])
 	if data.has("timestamp"):
 		GameManager.apply_offline_progress(data["timestamp"])
 

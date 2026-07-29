@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="RefinementRecipe" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/RefinementRecipe.gd" id="1"]
+[ext_resource type="Script" path="res://resources/CraftingIngredient.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/silk_gland.tres" id="3"]
+[ext_resource type="Resource" path="res://data/items/silk.tres" id="4"]
+
+[sub_resource type="Resource" id="Ing_silk_gland"]
+script = ExtResource("2")
+item = ExtResource("3")
+quantity = 1
+
+[resource]
+script = ExtResource("1")
+id = "silk_refine"
+inputs = Array[ExtResource("2")]([SubResource("Ing_silk_gland")])
+output_item = ExtResource("4")
+output_quantity = 3
+duration = 5.0
+required_unlock = ""

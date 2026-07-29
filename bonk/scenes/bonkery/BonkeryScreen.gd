@@ -5,6 +5,8 @@ signal navigate_to(screen_id: String)
 
 var _building_label: Label
 var _craft_container: VBoxContainer
+var _refinery_status: Label
+var _refinery_container: VBoxContainer
 var _recipes: Array[CraftingRecipe] = []
 
 func _ready() -> void:
@@ -46,16 +48,39 @@ func _ready() -> void:
 	_craft_container = VBoxContainer.new()
 	inner.add_child(_craft_container)
 
-	EventBus.item_obtained.connect(func(_i, _q): _refresh_craft_ui())
-	EventBus.item_removed.connect(func(_i, _q): _refresh_craft_ui())
+	inner.add_child(HSeparator.new())
+
+	var refine_title := Label.new()
+	refine_title.text = "Refinement"
+	refine_title.add_theme_font_size_override("font_size", 16)
+	inner.add_child(refine_title)
+
+	_refinery_status = Label.new()
+	_refinery_status.add_theme_font_size_override("font_size", 13)
+	inner.add_child(_refinery_status)
+
+	_refinery_container = VBoxContainer.new()
+	inner.add_child(_refinery_container)
+
+	EventBus.item_obtained.connect(func(_i, _q): _refresh_craft_ui(); _refresh_refinery_ui())
+	EventBus.item_removed.connect(func(_i, _q): _refresh_craft_ui(); _refresh_refinery_ui())
 	EventBus.item_crafted.connect(func(_r, _i): _refresh_craft_ui())
 	EventBus.building_upgrade_completed.connect(func(_b, _l): _refresh_building(); _refresh_craft_ui())
+	EventBus.refinement_completed.connect(func(_r): _refresh_refinery_ui())
+	EventBus.refinement_queued.connect(func(_r, _b): _refresh_refinery_ui())
+	EventBus.content_unlocked.connect(func(_id): _refresh_refinery_ui())
 
 	_load_recipes()
+
+func _process(_delta: float) -> void:
+	var active := RefineryManager.get_active_recipe()
+	if active:
+		_refinery_status.text = "Refining: %s  (%d left, %.1fs)" % [active.output_item.name, RefineryManager.get_active_batches_remaining(), RefineryManager.time_remaining()]
 
 func refresh() -> void:
 	_refresh_building()
 	_refresh_craft_ui()
+	_refresh_refinery_ui()
 
 func _refresh_building() -> void:
 	var level := CityManager.get_level("bonkery")
@@ -107,3 +132,44 @@ func _refresh_craft_ui() -> void:
 
 func _on_craft_pressed(recipe: CraftingRecipe) -> void:
 	CraftingManager.craft(recipe)
+
+func _refresh_refinery_ui() -> void:
+	var active := RefineryManager.get_active_recipe()
+	if active:
+		_refinery_status.text = "Refining: %s  (%d batches left)" % [active.output_item.name, RefineryManager.get_active_batches_remaining()]
+	else:
+		_refinery_status.text = "Idle"
+
+	for child in _refinery_container.get_children():
+		child.queue_free()
+
+	for recipe in ResourceRegistry.get_all_refinement():
+		if not RefineryManager.is_available(recipe):
+			continue
+		var row := HBoxContainer.new()
+		var ing_text := ""
+		for ing in recipe.inputs:
+			var have := InventoryManager.get_quantity(ing.item.id)
+			ing_text += "%s %d/%d  " % [ing.item.name, have, ing.quantity]
+		if recipe.tool_item:
+			var has_tool := InventoryManager.get_quantity(recipe.tool_item.id) > 0
+			ing_text += "[%s%s]  " % [recipe.tool_item.name, "" if has_tool else " ✗"]
+		var label := Label.new()
+		label.text = "%s  ←  %s(×%d, %ds)" % [recipe.output_item.name, ing_text.strip_edges(), recipe.output_quantity, int(recipe.duration)]
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.add_theme_font_size_override("font_size", 12)
+		row.add_child(label)
+		var max_b := RefineryManager.max_batchable(recipe)
+		var spin := SpinBox.new()
+		spin.min_value = 1
+		spin.max_value = max_b
+		spin.value = 1
+		spin.step = 1
+		spin.editable = max_b > 0
+		row.add_child(spin)
+		var btn := Button.new()
+		btn.text = "Queue"
+		btn.disabled = max_b <= 0
+		btn.pressed.connect(func(): RefineryManager.add_to_queue(recipe, int(spin.value)))
+		row.add_child(btn)
+		_refinery_container.add_child(row)

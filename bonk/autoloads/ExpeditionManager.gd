@@ -84,9 +84,10 @@ func _player_attack() -> void:
 	var multiplier := _get_damage_multiplier()
 	var final_damage := int(damage * multiplier)
 
+	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
 	var damage_type := GearData.DamageType.BLUNT
-	if CharacterManager.equipped_main_hand:
-		damage_type = CharacterManager.equipped_main_hand.damage_type
+	if weapon:
+		damage_type = weapon.damage_type
 
 	_monster_hp -= final_damage
 	EventBus.player_hit_monster.emit(final_damage, damage_type, multiplier)
@@ -105,16 +106,19 @@ func _monster_attack() -> void:
 
 	var damage := maxi(1, current_monster.strength - player_def / 2)
 
-	if CharacterManager.equipped_off_hand and CharacterManager.equipped_off_hand.slot == GearData.Slot.OFF_HAND:
+	var shield := CharacterManager.get_equipped(GearData.Slot.SHIELD)
+	if shield:
 		var block_chance := clampf(player_def / float(player_def + current_monster.strength), 0.0, 0.6)
 		if randf() < block_chance:
 			EventBus.player_blocked.emit(damage)
 			CharacterManager.gain_xp("defense", 2.0)
 			return
 
-	CharacterManager.take_damage(damage)
-	EventBus.monster_hit_player.emit(damage)
-	CharacterManager.gain_xp("hp", float(damage) * 0.5)
+	var resistance := CharacterManager.get_resistance(current_monster.attack_damage_type)
+	var final_damage := maxi(1, int(damage * (1.0 - resistance)))
+	CharacterManager.take_damage(final_damage)
+	EventBus.monster_hit_player.emit(final_damage)
+	CharacterManager.gain_xp("hp", float(final_damage) * 0.5)
 
 func _on_monster_died() -> void:
 	EventBus.monster_died.emit(current_monster)
@@ -128,11 +132,7 @@ func _on_player_died() -> void:
 	EventBus.expedition_ended.emit({"reason": "died"})
 
 func _roll_drops() -> void:
-	var drop_bonus := 0.0
-	if CharacterManager.equipped_main_hand:
-		drop_bonus = CharacterManager.equipped_main_hand.bonus_drop_chance
-	if CharacterManager.equipped_off_hand:
-		drop_bonus += CharacterManager.equipped_off_hand.bonus_drop_chance
+	var drop_bonus := CharacterManager.get_total_drop_bonus()
 
 	for e in current_monster.drops_guaranteed:
 		var qty := randi_range(e.quantity_min, e.quantity_max)
@@ -172,30 +172,23 @@ func _roll_single_table(entries: Array[DropEntry], table_chance: float, drop_bon
 			InventoryManager.add_item(e.item, qty)
 
 func _grant_weapon_xp(damage: int) -> void:
-	if not CharacterManager.equipped_main_hand:
+	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
+	if not weapon:
 		CharacterManager.gain_xp("strength", float(damage) * 5.0)
 		CharacterManager.gain_xp("speed", float(damage) * 2.5)
 		CharacterManager.gain_xp("accuracy", float(damage) * 2.5)
 		return
 
-	var weapon := CharacterManager.equipped_main_hand
 	var xp := float(damage) * 10.0
-
-	if weapon.two_handed:
-		CharacterManager.gain_xp("strength", xp * 0.5)
-		CharacterManager.gain_xp("speed", xp * 0.25)
-		CharacterManager.gain_xp("accuracy", xp * 0.25)
-	else:
-		match weapon.slot:
-			GearData.Slot.MAIN_HAND:
-				CharacterManager.gain_xp("strength", xp * 0.5)
-				CharacterManager.gain_xp("speed", xp * 0.25)
-				CharacterManager.gain_xp("accuracy", xp * 0.25)
+	CharacterManager.gain_xp("strength", xp * 0.5)
+	CharacterManager.gain_xp("speed", xp * 0.25)
+	CharacterManager.gain_xp("accuracy", xp * 0.25)
 
 func _get_damage_multiplier() -> float:
-	if not CharacterManager.equipped_main_hand:
+	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
+	if not weapon:
 		return 1.0
-	match CharacterManager.equipped_main_hand.damage_type:
+	match weapon.damage_type:
 		GearData.DamageType.BLUNT:   return current_monster.multiplier_blunt
 		GearData.DamageType.SLASH:   return current_monster.multiplier_slash
 		GearData.DamageType.PIERCE:  return current_monster.multiplier_pierce
@@ -224,11 +217,7 @@ func apply_offline_progress(elapsed: float) -> Dictionary:
 	if kills <= 0:
 		return {}
 
-	var drop_bonus := 0.0
-	if CharacterManager.equipped_main_hand:
-		drop_bonus = CharacterManager.equipped_main_hand.bonus_drop_chance
-	if CharacterManager.equipped_off_hand:
-		drop_bonus += CharacterManager.equipped_off_hand.bonus_drop_chance
+	var drop_bonus := CharacterManager.get_total_drop_bonus()
 
 	var drops_summary: Dictionary = {}
 	for i in kills:

@@ -14,8 +14,7 @@ var stats: Dictionary = {
 var current_hp: int = 0
 var max_hp: int = 0
 
-var equipped_main_hand: GearData = null
-var equipped_off_hand: GearData = null
+var equipped: Dictionary = {}  # GearData.Slot (int) → GearData
 
 func _ready() -> void:
 	recalculate_max_hp()
@@ -44,23 +43,19 @@ func xp_for_level(level: int) -> float:
 func get_level(stat_name: String) -> int:
 	return stats[stat_name]["level"]
 
+func get_equipped(slot: GearData.Slot) -> GearData:
+	return equipped.get(slot, null)
+
 func get_effective_stat(stat_name: String) -> int:
 	var base := get_level(stat_name)
 	var bonus := 0
-	if equipped_main_hand:
+	for gear in equipped.values():
 		match stat_name:
-			"strength": bonus += equipped_main_hand.bonus_strength
-			"speed":    bonus += equipped_main_hand.bonus_speed
-			"accuracy": bonus += equipped_main_hand.bonus_accuracy
-			"hp":       bonus += equipped_main_hand.bonus_hp
-			"defense":  bonus += equipped_main_hand.bonus_defense
-	if equipped_off_hand:
-		match stat_name:
-			"defense":  bonus += equipped_off_hand.bonus_defense
-			"hp":       bonus += equipped_off_hand.bonus_hp
-			"strength": bonus += equipped_off_hand.bonus_strength
-			"speed":    bonus += equipped_off_hand.bonus_speed
-			"accuracy": bonus += equipped_off_hand.bonus_accuracy
+			"strength": bonus += gear.bonus_strength
+			"speed":    bonus += gear.bonus_speed
+			"accuracy": bonus += gear.bonus_accuracy
+			"hp":       bonus += gear.bonus_hp
+			"defense":  bonus += gear.bonus_defense
 	return base + bonus
 
 func recalculate_max_hp() -> void:
@@ -77,30 +72,48 @@ func is_alive() -> bool:
 	return current_hp > 0
 
 func equip(gear: GearData) -> void:
-	match gear.slot:
-		GearData.Slot.MAIN_HAND: equipped_main_hand = gear
-		GearData.Slot.OFF_HAND:  equipped_off_hand = gear
+	equipped[gear.slot] = gear
 	recalculate_max_hp()
 
 func unequip(slot: GearData.Slot) -> void:
-	match slot:
-		GearData.Slot.MAIN_HAND: equipped_main_hand = null
-		GearData.Slot.OFF_HAND:  equipped_off_hand = null
+	equipped.erase(slot)
 	recalculate_max_hp()
 
+func get_resistance(damage_type: GearData.DamageType) -> float:
+	var total := 0.0
+	for gear in equipped.values():
+		match damage_type:
+			GearData.DamageType.BLUNT:   total += gear.resistance_blunt
+			GearData.DamageType.SLASH:   total += gear.resistance_slash
+			GearData.DamageType.PIERCE:  total += gear.resistance_pierce
+			GearData.DamageType.FIRE:    total += gear.resistance_fire
+			GearData.DamageType.POISON:  total += gear.resistance_poison
+			GearData.DamageType.SPIRIT:  total += gear.resistance_spirit
+	return clampf(total, -1.0, 0.9)
+
+func get_total_drop_bonus() -> float:
+	var bonus := 0.0
+	for gear in equipped.values():
+		bonus += gear.bonus_drop_chance
+	return bonus
+
 func serialize() -> Dictionary:
+	var equipped_data := {}
+	for slot in equipped:
+		equipped_data[str(slot)] = equipped[slot].id
 	return {
 		"stats": stats.duplicate(true),
 		"current_hp": current_hp,
-		"equipped_main_hand": equipped_main_hand.id if equipped_main_hand else "",
-		"equipped_off_hand": equipped_off_hand.id if equipped_off_hand else "",
+		"equipped": equipped_data,
 	}
 
 func deserialize(data: Dictionary) -> void:
 	stats = data["stats"]
 	current_hp = data["current_hp"]
-	var mh_id: String = data.get("equipped_main_hand", "")
-	var oh_id: String = data.get("equipped_off_hand", "")
-	equipped_main_hand = ResourceRegistry.find_item(mh_id) as GearData if mh_id != "" else null
-	equipped_off_hand = ResourceRegistry.find_item(oh_id) as GearData if oh_id != "" else null
+	equipped = {}
+	for slot_str in data.get("equipped", {}):
+		var item_id: String = data["equipped"][slot_str]
+		var gear := ResourceRegistry.find_item(item_id) as GearData
+		if gear:
+			equipped[int(slot_str)] = gear
 	recalculate_max_hp()

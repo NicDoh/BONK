@@ -73,21 +73,34 @@ func _refresh_stats() -> void:
 	_stats_label.text = "\n".join(lines)
 
 func _refresh_gear() -> void:
-	var main := CharacterManager.equipped_main_hand
-	var off := CharacterManager.equipped_off_hand
-	_gear_label.text = "Main hand: %s\nOff hand:  %s" % [main.name if main else "none", off.name if off else "none"]
+	var slot_names := {
+		GearData.Slot.WEAPON: "Weapon",
+		GearData.Slot.SHIELD: "Shield",
+		GearData.Slot.HEAD:   "Head",
+		GearData.Slot.BODY:   "Body",
+		GearData.Slot.LEGS:   "Legs",
+		GearData.Slot.BOOTS:  "Boots",
+		GearData.Slot.GLOVES: "Gloves",
+		GearData.Slot.AMULET: "Amulet",
+		GearData.Slot.CHARM:  "Charm",
+		GearData.Slot.CAPE:   "Cape",
+		GearData.Slot.QUIVER: "Quiver",
+	}
+	var lines := []
+	for slot in slot_names:
+		var gear := CharacterManager.get_equipped(slot)
+		lines.append("%s: %s" % [slot_names[slot], gear.name if gear else "—"])
+	_gear_label.text = "\n".join(lines)
+
 	for child in _unequip_container.get_children():
 		child.queue_free()
-	if main:
-		var btn := Button.new()
-		btn.text = "Unequip %s" % main.name
-		btn.pressed.connect(func(): CharacterManager.unequip(GearData.Slot.MAIN_HAND); _refresh_gear(); _refresh_stats())
-		_unequip_container.add_child(btn)
-	if off:
-		var btn := Button.new()
-		btn.text = "Unequip %s" % off.name
-		btn.pressed.connect(func(): CharacterManager.unequip(GearData.Slot.OFF_HAND); _refresh_gear(); _refresh_stats())
-		_unequip_container.add_child(btn)
+	for slot in slot_names:
+		var gear := CharacterManager.get_equipped(slot)
+		if gear:
+			var btn := Button.new()
+			btn.text = "Unequip %s" % gear.name
+			btn.pressed.connect(func(): CharacterManager.unequip(slot); _refresh_gear(); _refresh_stats())
+			_unequip_container.add_child(btn)
 
 func _refresh_inventory() -> void:
 	var all := InventoryManager.get_all_items()

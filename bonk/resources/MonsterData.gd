@@ -1,8 +1,6 @@
 class_name MonsterData
 extends Resource
 
-enum DamageType { BLUNT, SLASH, PIERCE, FIRE, POISON, SPIRIT }
-
 @export var id: String = ""
 @export var name: String = ""
 @export var description: String = ""
@@ -15,7 +13,7 @@ enum DamageType { BLUNT, SLASH, PIERCE, FIRE, POISON, SPIRIT }
 @export var speed: int = 1
 @export var accuracy: int = 10
 
-@export var attack_damage_type: DamageType = DamageType.BLUNT
+@export var attack_damage_type: GearData.DamageType = GearData.DamageType.BLUNT
 
 # Damage multipliers: 0.0 = immune, 0.5 = resistant, 1.0 = neutral, 1.5 = weak
 @export var multiplier_blunt: float = 1.0

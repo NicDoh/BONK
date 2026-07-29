@@ -1,19 +1,20 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="GearData" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://resources/GearData.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
-id = "bone_club"
-name = "Crude Club"
-description = "A rough club shaped from carved bone."
+id = "spiked_club"
+name = "Spiked Club"
+description = "A bone club lined with sharp spikes. Hits harder."
 rarity = 0
 stackable = false
 max_stack = 1
+tier = 0
 slot = 0
 two_handed = false
 damage_type = 0
-bonus_strength = 2
+bonus_strength = 4
 bonus_speed = 1
 bonus_accuracy = 0
 bonus_defense = 0

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="RefinementRecipe" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/RefinementRecipe.gd" id="1"]
+[ext_resource type="Script" path="res://resources/CraftingIngredient.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/bones.tres" id="3"]
+[ext_resource type="Resource" path="res://data/items/carved_bone.tres" id="4"]
+
+[sub_resource type="Resource" id="Ing_bones"]
+script = ExtResource("2")
+item = ExtResource("3")
+quantity = 5
+
+[resource]
+script = ExtResource("1")
+id = "carved_bone_refine"
+inputs = Array[ExtResource("2")]([SubResource("Ing_bones")])
+output_item = ExtResource("4")
+output_quantity = 1
+duration = 5.0
+required_unlock = ""

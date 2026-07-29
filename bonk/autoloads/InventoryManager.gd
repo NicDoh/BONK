@@ -38,19 +38,29 @@ func add_item(item: ItemData, quantity: int = 1) -> bool:
 func remove_item(item: ItemData, quantity: int = 1) -> bool:
 	if not has_item(item.id, quantity):
 		return false
-	items[item.id]["quantity"] -= quantity
-	if items[item.id]["quantity"] <= 0:
-		items.erase(item.id)
+	var remaining := quantity
+	for slot_id in items.keys():
+		if items[slot_id]["item_id"] != item.id:
+			continue
+		var take := mini(remaining, items[slot_id]["quantity"])
+		items[slot_id]["quantity"] -= take
+		remaining -= take
+		if items[slot_id]["quantity"] <= 0:
+			items.erase(slot_id)
+		if remaining <= 0:
+			break
 	EventBus.item_removed.emit(item, quantity)
 	return true
 
 func has_item(item_id: String, quantity: int = 1) -> bool:
-	return items.has(item_id) and items[item_id]["quantity"] >= quantity
+	return get_quantity(item_id) >= quantity
 
 func get_quantity(item_id: String) -> int:
-	if items.has(item_id):
-		return items[item_id]["quantity"]
-	return 0
+	var total := 0
+	for slot in items.values():
+		if slot["item_id"] == item_id:
+			total += slot["quantity"]
+	return total
 
 func get_metadata(slot_id: String) -> Dictionary:
 	if items.has(slot_id):

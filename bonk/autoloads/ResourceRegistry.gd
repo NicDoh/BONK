@@ -4,12 +4,14 @@ var items: Dictionary = {}
 var gear: Dictionary = {}
 var research: Dictionary = {}
 var zones: Dictionary = {}
+var refinement: Dictionary = {}
 
 func _ready() -> void:
 	_load_directory("res://data/items/", items, ItemData)
 	_load_directory("res://data/gear/", gear, ItemData)
 	_load_directory("res://data/research/", research, ResearchData)
 	_load_directory("res://data/zones/", zones, ZoneData)
+	_load_directory("res://data/refinement/", refinement, RefinementRecipe)
 
 func _load_directory(path: String, registry: Dictionary, type) -> void:
 	var dir := DirAccess.open(path)
@@ -39,3 +41,6 @@ func get_all_research() -> Array:
 
 func get_all_zones() -> Array:
 	return zones.values()
+
+func get_all_refinement() -> Array:
+	return refinement.values()

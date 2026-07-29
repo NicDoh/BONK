@@ -41,6 +41,10 @@ signal item_crafted(recipe_id: String, result: ItemData)
 signal item_salvaged(gear_data: GearData)
 signal resources_burned(resource_id: String, quantity: int)
 
+# Refinement
+signal refinement_queued(recipe: RefinementRecipe, batches: int)
+signal refinement_completed(recipe: RefinementRecipe)
+
 # Collection log
 signal collection_entry_completed(entry_id: String)
 signal fragment_set_completed(set_id: String)
