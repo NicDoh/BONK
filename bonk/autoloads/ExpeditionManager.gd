@@ -118,33 +118,44 @@ func _player_attack() -> void:
 		EventBus.player_missed.emit()
 		return
 
-	var type_mult := _get_damage_multiplier()
-	var base_damage := float(CharacterManager.get_weapon_damage()) * type_mult
+	var base_damage := float(CharacterManager.get_weapon_damage())
 	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
 	var damage_type := weapon.damage_type if weapon else GearData.DamageType.BLUNT
 
-	var final_damage: int
+	var rolled: int
+	var crit_mult: float
 	if randf() < _crit_chance(accuracy, defense):
-		final_damage = maxi(1, ceili(base_damage * CRIT_MULT))
-		EventBus.player_hit_monster.emit(final_damage, damage_type, CRIT_MULT)
+		rolled = maxi(1, ceili(base_damage * CRIT_MULT))
+		crit_mult = CRIT_MULT
 	else:
-		final_damage = _damage_roll(base_damage, accuracy)
-		EventBus.player_hit_monster.emit(final_damage, damage_type, 1.0)
+		rolled = _damage_roll(base_damage, accuracy)
+		crit_mult = 1.0
 
+	var reduction  := _damage_reduction(defense, accuracy)
+	var type_mult  := _get_damage_multiplier()
+	var final_damage := maxi(1, ceili(float(rolled) * (1.0 - reduction) * type_mult))
+
+	EventBus.player_hit_monster.emit(final_damage, damage_type, crit_mult)
 	_monster_hp -= final_damage
 
 func _monster_attack() -> void:
-	var mon_acc  := float(current_monster.accuracy)
+	var mon_acc    := float(current_monster.accuracy)
 	var player_def := float(CharacterManager.get_total_defense())
 
 	if randf() > _hit_chance(mon_acc, player_def):
 		EventBus.monster_missed.emit()
 		return
 
-	var raw := _damage_roll(float(current_monster.strength), mon_acc)
-	var reduction := _damage_reduction(player_def, mon_acc)
+	var base := float(current_monster.strength)
+	var rolled: int
+	if randf() < _crit_chance(mon_acc, player_def):
+		rolled = maxi(1, ceili(base * CRIT_MULT))
+	else:
+		rolled = _damage_roll(base, mon_acc)
+
+	var reduction  := _damage_reduction(player_def, mon_acc)
 	var resistance := CharacterManager.get_resistance(current_monster.attack_damage_type)
-	var final_damage := maxi(1, int(float(raw) * (1.0 - reduction) * (1.0 - resistance)))
+	var final_damage := maxi(1, int(float(rolled) * (1.0 - reduction) * (1.0 - resistance)))
 
 	CharacterManager.take_damage(final_damage)
 	EventBus.monster_hit_player.emit(final_damage)
