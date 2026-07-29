@@ -58,7 +58,7 @@ func get_total_strength() -> int:
 	var total := get_level("strength")
 	for gear in equipped.values():
 		total += gear.strength_bonus
-	return total
+	return maxi(0, total)
 
 func get_weapon_damage() -> int:
 	var weapon := get_equipped(GearData.Slot.WEAPON)
@@ -69,7 +69,7 @@ func get_total_defense() -> int:
 	var total := get_level("defense")
 	for gear in equipped.values():
 		total += gear.defense
-	return total
+	return maxi(0, total)
 
 func get_attack_interval() -> float:
 	var weapon := get_equipped(GearData.Slot.WEAPON)
@@ -83,7 +83,7 @@ func get_total_accuracy() -> int:
 	var base := get_level("accuracy")
 	for gear in equipped.values():
 		base += gear.accuracy_bonus
-	return base
+	return maxi(0, base)
 
 func get_resistance(damage_type: GearData.DamageType) -> float:
 	var key := (GearData.DamageType.keys()[damage_type] as String).to_lower()
