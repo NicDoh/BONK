@@ -218,7 +218,8 @@ func _get_damage_multiplier() -> float:
 	if not weapon:
 		return 1.0
 	var type_name := (GearData.DamageType.keys()[weapon.damage_type] as String).to_lower()
-	return current_monster.get("multiplier_" + type_name, 1.0)
+	var result = current_monster.get("multiplier_" + type_name)
+	return result if result != null else 1.0
 
 func _get_player_tick_interval() -> float:
 	return CharacterManager.get_attack_interval()
