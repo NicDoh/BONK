@@ -69,9 +69,7 @@ func _refresh_stats() -> void:
 		var level := CharacterManager.get_level(stat)
 		var xp: float = CharacterManager.stats[stat]["xp"]
 		var needed := CharacterManager.xp_for_level(level + 1)
-		var mult := CharacterManager.get_multiplier(stat) if stat != "accuracy" and stat != "constitution" else 0.0
-		var suffix := "  (×%.2f)" % mult if mult > 0.0 else ""
-		lines.append("%s: %d%s  (%.0f / %.0f xp)" % [stat.capitalize(), level, suffix, xp, needed])
+		lines.append("%s: %d  (%.0f / %.0f xp)" % [stat.capitalize(), level, xp, needed])
 	lines.append("HP: %d / %d" % [CharacterManager.current_hp, CharacterManager.max_hp])
 	lines.append("Attack: %.1fs  Accuracy: %d" % [CharacterManager.get_attack_interval(), CharacterManager.get_total_accuracy()])
 	_stats_label.text = "\n".join(lines)
