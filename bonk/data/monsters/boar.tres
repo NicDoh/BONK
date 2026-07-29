@@ -1,0 +1,48 @@
+[gd_resource type="Resource" script_class="MonsterData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://resources/MonsterData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/DropEntry.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/hide.tres" id="3"]
+[ext_resource type="Resource" path="res://data/items/meat.tres" id="4"]
+[ext_resource type="Resource" path="res://data/items/boar_tusk.tres" id="5"]
+
+[sub_resource type="Resource" id="Drop_hide"]
+script = ExtResource("2")
+item = ExtResource("3")
+quantity_min = 1
+quantity_max = 2
+weight = 1.0
+
+[sub_resource type="Resource" id="Drop_meat"]
+script = ExtResource("2")
+item = ExtResource("4")
+quantity_min = 1
+quantity_max = 2
+weight = 1.0
+
+[sub_resource type="Resource" id="Drop_tusk"]
+script = ExtResource("2")
+item = ExtResource("5")
+quantity_min = 1
+quantity_max = 1
+weight = 1.0
+
+[resource]
+script = ExtResource("1")
+id = "boar"
+name = "Boar"
+description = "A stocky, ill-tempered beast. It will charge if provoked."
+hp = 35
+xp_reward = 50
+strength = 6
+defense = 3
+speed = 2
+accuracy = 8
+attack_damage_type = 0
+multiplier_slash = 1.5
+multiplier_fire = 1.5
+multiplier_pierce = 0.5
+drops_guaranteed = Array[ExtResource("2")]([SubResource("Drop_hide")])
+drops_common = Array[ExtResource("2")]([SubResource("Drop_meat")])
+rare_table_chance = 0.08
+drops_rare = Array[ExtResource("2")]([SubResource("Drop_tusk")])

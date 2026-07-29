@@ -1,0 +1,48 @@
+[gd_resource type="Resource" script_class="MonsterData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://resources/MonsterData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/DropEntry.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/scales.tres" id="3"]
+[ext_resource type="Resource" path="res://data/items/sunbasker_tail.tres" id="4"]
+[ext_resource type="Resource" path="res://data/items/sun_scale.tres" id="5"]
+
+[sub_resource type="Resource" id="Drop_scales"]
+script = ExtResource("2")
+item = ExtResource("3")
+quantity_min = 1
+quantity_max = 2
+weight = 1.0
+
+[sub_resource type="Resource" id="Drop_tail"]
+script = ExtResource("2")
+item = ExtResource("4")
+quantity_min = 1
+quantity_max = 1
+weight = 1.0
+
+[sub_resource type="Resource" id="Drop_sun_scale"]
+script = ExtResource("2")
+item = ExtResource("5")
+quantity_min = 1
+quantity_max = 1
+weight = 1.0
+
+[resource]
+script = ExtResource("1")
+id = "sunbasker"
+name = "Sunbasker"
+description = "A large lizard that basks lazily in the open sun. Deceptively tough."
+hp = 28
+xp_reward = 40
+strength = 3
+defense = 8
+speed = 1
+accuracy = 5
+attack_damage_type = 0
+multiplier_blunt = 1.5
+multiplier_fire = 0.5
+multiplier_poison = 0.5
+drops_guaranteed = Array[ExtResource("2")]([SubResource("Drop_scales")])
+drops_common = Array[ExtResource("2")]([SubResource("Drop_tail")])
+rare_table_chance = 0.05
+drops_rare = Array[ExtResource("2")]([SubResource("Drop_sun_scale")])

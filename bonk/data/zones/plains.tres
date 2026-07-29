@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ZoneData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://resources/ZoneData.gd" id="1"]
+[ext_resource type="Script" path="res://resources/ZoneMonsterEntry.gd" id="2"]
+[ext_resource type="Resource" path="res://data/monsters/boar.tres" id="3"]
+[ext_resource type="Resource" path="res://data/monsters/sunbasker.tres" id="4"]
+
+[sub_resource type="Resource" id="Entry_boar"]
+script = ExtResource("2")
+monster = ExtResource("3")
+weight = 1.0
+
+[sub_resource type="Resource" id="Entry_sunbasker"]
+script = ExtResource("2")
+monster = ExtResource("4")
+weight = 1.0
+
+[resource]
+script = ExtResource("1")
+id = "plains"
+name = "Plains"
+description = "Open grassland stretching beyond the tribe. Bigger things roam here."
+roam_monsters = Array[ExtResource("2")]([SubResource("Entry_boar"), SubResource("Entry_sunbasker")])
+boss = null
+required_unlock = ""
