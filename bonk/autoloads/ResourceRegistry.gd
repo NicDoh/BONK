@@ -2,6 +2,7 @@ extends Node
 
 var items: Dictionary = {}
 var gear: Dictionary = {}
+var monsters: Dictionary = {}
 var research: Dictionary = {}
 var zones: Dictionary = {}
 var refinement: Dictionary = {}
@@ -9,6 +10,7 @@ var refinement: Dictionary = {}
 func _ready() -> void:
 	_load_directory("res://data/items/", items, ItemData)
 	_load_directory("res://data/gear/", gear, ItemData)
+	_load_directory("res://data/monsters/", monsters, MonsterData)
 	_load_directory("res://data/research/", research, ResearchData)
 	_load_directory("res://data/zones/", zones, ZoneData)
 	_load_directory("res://data/refinement/", refinement, RefinementRecipe)
@@ -25,6 +27,12 @@ func _load_directory(path: String, registry: Dictionary, type) -> void:
 			if is_instance_of(res, type):
 				registry[res.id] = res
 		file_name = dir.get_next()
+
+func find_monster(monster_id: String) -> MonsterData:
+	return monsters.get(monster_id, null)
+
+func get_all_monsters() -> Array:
+	return monsters.values()
 
 func find_item(item_id: String) -> ItemData:
 	if items.has(item_id):

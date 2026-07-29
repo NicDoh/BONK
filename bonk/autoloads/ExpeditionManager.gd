@@ -217,14 +217,8 @@ func _get_damage_multiplier() -> float:
 	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
 	if not weapon:
 		return 1.0
-	match weapon.damage_type:
-		GearData.DamageType.BLUNT:   return current_monster.multiplier_blunt
-		GearData.DamageType.SLASH:   return current_monster.multiplier_slash
-		GearData.DamageType.PIERCE:  return current_monster.multiplier_pierce
-		GearData.DamageType.FIRE:    return current_monster.multiplier_fire
-		GearData.DamageType.POISON:  return current_monster.multiplier_poison
-		GearData.DamageType.SPIRIT:  return current_monster.multiplier_spirit
-	return 1.0
+	var type_name := GearData.DamageType.keys()[weapon.damage_type].to_lower()
+	return current_monster.get("multiplier_" + type_name, 1.0)
 
 func _get_player_tick_interval() -> float:
 	return CharacterManager.get_attack_interval()
