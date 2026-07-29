@@ -97,7 +97,6 @@ func _monster_attack() -> void:
 
 	if randf() > hit_chance:
 		EventBus.monster_missed.emit()
-		CharacterManager.gain_xp("defense", 1.0)
 		return
 
 	var damage := maxi(1, current_monster.strength - player_def / 2)
@@ -107,14 +106,12 @@ func _monster_attack() -> void:
 		var block_chance := clampf(player_def / float(player_def + current_monster.strength), 0.0, 0.6)
 		if randf() < block_chance:
 			EventBus.player_blocked.emit(damage)
-			CharacterManager.gain_xp("defense", 2.0)
 			return
 
 	var resistance := CharacterManager.get_resistance(current_monster.attack_damage_type)
 	var final_damage := maxi(1, int(damage * (1.0 - resistance)))
 	CharacterManager.take_damage(final_damage)
 	EventBus.monster_hit_player.emit(final_damage)
-	CharacterManager.gain_xp("constitution", float(final_damage) * 0.5)
 
 func _on_monster_died() -> void:
 	EventBus.monster_died.emit(current_monster)
