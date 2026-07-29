@@ -33,6 +33,7 @@ id = "tangler"
 name = "Tangler"
 description = "Eight legs, zero mercy."
 hp = 10
+xp_reward = 18
 strength = 2
 defense = 1
 speed = 4

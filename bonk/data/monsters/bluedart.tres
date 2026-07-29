@@ -25,6 +25,7 @@ id = "bluedart"
 name = "Bluedart"
 description = "A streak of blue. Attacks in a spinning dive."
 hp = 8
+xp_reward = 12
 strength = 2
 defense = 1
 speed = 6

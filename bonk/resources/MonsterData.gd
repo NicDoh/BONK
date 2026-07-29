@@ -13,6 +13,7 @@ extends Resource
 @export var speed: int = 1
 @export var accuracy: int = 10
 
+@export var xp_reward: int = 10
 @export var attack_damage_type: GearData.DamageType = GearData.DamageType.BLUNT
 
 # Damage multipliers: 0.0 = immune, 0.5 = resistant, 1.0 = neutral, 1.5 = weak

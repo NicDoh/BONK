@@ -88,7 +88,6 @@ func _player_attack() -> void:
 
 	_monster_hp -= final_damage
 	EventBus.player_hit_monster.emit(final_damage, damage_type, multiplier)
-	_grant_weapon_xp(final_damage)
 
 func _monster_attack() -> void:
 	var monster_acc := current_monster.accuracy
@@ -115,6 +114,7 @@ func _monster_attack() -> void:
 
 func _on_monster_died() -> void:
 	EventBus.monster_died.emit(current_monster)
+	CharacterManager.gain_xp(CharacterManager.active_training, float(current_monster.xp_reward))
 	_roll_drops()
 	_pick_next_monster()
 
@@ -164,8 +164,6 @@ func _roll_single_table(entries: Array[DropEntry], table_chance: float, drop_bon
 			var qty := randi_range(e.quantity_min, e.quantity_max)
 			InventoryManager.add_item(e.item, qty)
 
-func _grant_weapon_xp(damage: int) -> void:
-	CharacterManager.gain_xp(CharacterManager.active_training, float(damage) * 10.0)
 
 func _get_damage_multiplier() -> float:
 	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
@@ -207,8 +205,7 @@ func apply_offline_progress(elapsed: float) -> Dictionary:
 		for item_name in results:
 			drops_summary[item_name] = drops_summary.get(item_name, 0) + results[item_name]
 
-	var xp_per_kill := float(avg_damage * ticks_per_kill) * 10.0
-	CharacterManager.gain_xp(CharacterManager.active_training, xp_per_kill * kills)
+	CharacterManager.gain_xp(CharacterManager.active_training, float(current_monster.xp_reward * kills))
 
 	return {"kills": kills, "elapsed": elapsed, "drops": drops_summary}
 

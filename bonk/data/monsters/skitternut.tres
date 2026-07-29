@@ -41,6 +41,7 @@ id = "skitternut"
 name = "Skitternut"
 description = "Fast and frantic. Gone before you know it hit you."
 hp = 6
+xp_reward = 8
 strength = 1
 defense = 1
 speed = 8
