@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/CraftingIngredient.gd" id="1"]
+[ext_resource type="Script" path="res://resources/CraftingRecipe.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/carved_bone.tres" id="3"]
+[ext_resource type="Resource" path="res://data/gear/bone_helm.tres" id="4"]
+
+[sub_resource type="Resource" id="Ing_carved_bone"]
+script = ExtResource("1")
+item = ExtResource("3")
+quantity = 3
+
+[resource]
+script = ExtResource("2")
+id = "bone_helm"
+result_item = ExtResource("4")
+ingredients = Array[ExtResource("1")]([SubResource("Ing_carved_bone")])
+required_building_level = 0
