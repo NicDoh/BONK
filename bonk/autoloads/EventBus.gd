@@ -13,6 +13,7 @@ signal player_died()
 # XP
 signal stat_xp_gained(stat_name: String, amount: float)
 signal stat_leveled_up(stat_name: String, new_level: int)
+signal training_focus_changed(stat_name: String)
 signal pet_xp_gained(pet_instance: PetInstance, amount: float)
 signal pet_leveled_up(pet_instance: PetInstance, new_level: int)
 

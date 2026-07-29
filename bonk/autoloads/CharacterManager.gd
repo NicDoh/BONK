@@ -6,20 +6,27 @@ const BARE_HANDS_DAMAGE: int = 2
 const BARE_HANDS_INTERVAL: float = 2.0
 
 var stats: Dictionary = {
-	"strength":    {"level": 1, "xp": 0.0},
-	"defense":     {"level": 1, "xp": 0.0},
-	"constitution":{"level": 1, "xp": 0.0},
-	"accuracy":    {"level": 1, "xp": 0.0},
+	"strength":    {"level": 0, "xp": 0.0},
+	"defense":     {"level": 0, "xp": 0.0},
+	"constitution":{"level": 0, "xp": 0.0},
+	"accuracy":    {"level": 0, "xp": 0.0},
 }
 
 var current_hp: int = 0
 var max_hp: int = 0
 
 var equipped: Dictionary = {}  # GearData.Slot (int) → GearData
+var active_training: String = "strength"
 
 func _ready() -> void:
 	recalculate_max_hp()
 	current_hp = max_hp
+
+func set_training(stat_name: String) -> void:
+	if not stats.has(stat_name):
+		return
+	active_training = stat_name
+	EventBus.training_focus_changed.emit(stat_name)
 
 func gain_xp(stat_name: String, amount: float) -> void:
 	if not stats.has(stat_name):
@@ -48,7 +55,7 @@ func get_equipped(slot: GearData.Slot) -> GearData:
 	return equipped.get(slot, null)
 
 func get_multiplier(stat_name: String) -> float:
-	return 1.0 + sqrt(max(get_level(stat_name) - 1, 0)) * 0.33
+	return 1.0 + get_level(stat_name) * 0.1
 
 func get_weapon_damage() -> int:
 	var weapon := get_equipped(GearData.Slot.WEAPON)
@@ -92,7 +99,7 @@ func recalculate_max_hp() -> void:
 	var bonus_hp := 0
 	for gear in equipped.values():
 		bonus_hp += gear.bonus_hp
-	max_hp = get_level("constitution") * 10 + bonus_hp
+	max_hp = 100 + get_level("constitution") * 10 + bonus_hp
 	current_hp = mini(current_hp, max_hp)
 
 func take_damage(amount: int) -> void:
@@ -120,6 +127,7 @@ func serialize() -> Dictionary:
 		"stats": stats.duplicate(true),
 		"current_hp": current_hp,
 		"equipped": equipped_data,
+		"active_training": active_training,
 	}
 
 func deserialize(data: Dictionary) -> void:
@@ -133,6 +141,7 @@ func deserialize(data: Dictionary) -> void:
 		if loaded.has(key):
 			stats[key] = loaded[key]
 	current_hp = data.get("current_hp", max_hp)
+	active_training = data.get("active_training", "strength")
 	equipped = {}
 	for slot_str in data.get("equipped", {}):
 		var item_id: String = data["equipped"][slot_str]

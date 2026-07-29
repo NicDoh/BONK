@@ -18,7 +18,7 @@ func _ready() -> void:
 
 	inner.add_child(HSeparator.new())
 
-	for building in [["bonkery", "Bonkery"], ["thinkery", "Thinkery"]]:
+	for building in [["bonkery", "Bonkery"], ["thinkery", "Thinkery"], ["oggsHearth", "Ogg's Hearth"]]:
 		var btn := Button.new()
 		btn.text = building[1]
 		btn.custom_minimum_size.y = 48

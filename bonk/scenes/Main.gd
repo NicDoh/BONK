@@ -8,6 +8,7 @@ var _character: CharacterScreen
 var _tribe: TribeScreen
 var _bonkery: BonkeryScreen
 var _thinkery: ThinkeryScreen
+var _oggsHearth: OggsHearthScreen
 
 func _ready() -> void:
 	anchor_right = 1.0
@@ -28,12 +29,14 @@ func _ready() -> void:
 	_tribe = TribeScreen.new()
 	_bonkery = BonkeryScreen.new()
 	_thinkery = ThinkeryScreen.new()
+	_oggsHearth = OggsHearthScreen.new()
 
 	_tribe.navigate_to.connect(_navigate)
 	_bonkery.navigate_to.connect(_navigate)
 	_thinkery.navigate_to.connect(_navigate)
+	_oggsHearth.navigate_to.connect(_navigate)
 
-	for screen in [_expedition, _character, _tribe, _bonkery, _thinkery]:
+	for screen in [_expedition, _character, _tribe, _bonkery, _thinkery, _oggsHearth]:
 		screen.visible = false
 		screen_container.add_child(screen)
 
@@ -43,6 +46,7 @@ func _ready() -> void:
 		"tribe": _tribe,
 		"bonkery": _bonkery,
 		"thinkery": _thinkery,
+		"oggsHearth": _oggsHearth,
 	}
 
 	var nav := HBoxContainer.new()

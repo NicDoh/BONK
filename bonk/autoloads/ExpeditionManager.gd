@@ -168,9 +168,7 @@ func _roll_single_table(entries: Array[DropEntry], table_chance: float, drop_bon
 			InventoryManager.add_item(e.item, qty)
 
 func _grant_weapon_xp(damage: int) -> void:
-	var xp := float(damage) * 10.0
-	CharacterManager.gain_xp("strength", xp * 0.6)
-	CharacterManager.gain_xp("accuracy", xp * 0.4)
+	CharacterManager.gain_xp(CharacterManager.active_training, float(damage) * 10.0)
 
 func _get_damage_multiplier() -> float:
 	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
@@ -212,9 +210,8 @@ func apply_offline_progress(elapsed: float) -> Dictionary:
 		for item_name in results:
 			drops_summary[item_name] = drops_summary.get(item_name, 0) + results[item_name]
 
-	var xp_per_kill := float(avg_damage * ticks_per_kill)
-	CharacterManager.gain_xp("strength", xp_per_kill * kills * 0.6)
-	CharacterManager.gain_xp("accuracy", xp_per_kill * kills * 0.4)
+	var xp_per_kill := float(avg_damage * ticks_per_kill) * 10.0
+	CharacterManager.gain_xp(CharacterManager.active_training, xp_per_kill * kills)
 
 	return {"kills": kills, "elapsed": elapsed, "drops": drops_summary}
 
