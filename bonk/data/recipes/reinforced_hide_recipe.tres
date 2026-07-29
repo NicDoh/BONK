@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://resources/CraftingIngredient.gd" id="1"]
+[ext_resource type="Script" path="res://resources/CraftingRecipe.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/leather.tres" id="3"]
+[ext_resource type="Resource" path="res://data/items/carved_bone.tres" id="4"]
+[ext_resource type="Resource" path="res://data/items/thread.tres" id="5"]
+[ext_resource type="Resource" path="res://data/gear/reinforced_hide.tres" id="6"]
+
+[sub_resource type="Resource" id="Ing_leather"]
+script = ExtResource("1")
+item = ExtResource("3")
+quantity = 2
+
+[sub_resource type="Resource" id="Ing_carved_bone"]
+script = ExtResource("1")
+item = ExtResource("4")
+quantity = 2
+
+[sub_resource type="Resource" id="Ing_thread"]
+script = ExtResource("1")
+item = ExtResource("5")
+quantity = 1
+
+[resource]
+script = ExtResource("2")
+id = "reinforced_hide"
+result_item = ExtResource("6")
+ingredients = Array[ExtResource("1")]([SubResource("Ing_leather"), SubResource("Ing_carved_bone"), SubResource("Ing_thread")])
+required_building_level = 0
