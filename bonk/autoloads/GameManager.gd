@@ -1,6 +1,6 @@
 extends Node
 
-enum PlayerState { IDLE, EXPEDITION, RESEARCHING }
+enum PlayerState { IDLE, EXPEDITION, RESEARCHING, REFINING }
 
 const MAX_OFFLINE_SECONDS := 3600.0
 
@@ -12,6 +12,8 @@ func _ready() -> void:
 	EventBus.expedition_ended.connect(func(_r): _set_state(PlayerState.IDLE))
 	EventBus.research_started.connect(func(_d): _set_state(PlayerState.RESEARCHING))
 	EventBus.research_completed.connect(func(_d): _set_state(PlayerState.IDLE))
+	EventBus.refinement_queued.connect(func(_r, _b): _set_state(PlayerState.REFINING))
+	EventBus.refinement_queue_emptied.connect(func(): _set_state(PlayerState.IDLE))
 	SaveManager.load_save()
 	_derive_state()
 
@@ -31,6 +33,8 @@ func _derive_state() -> void:
 		player_state = PlayerState.EXPEDITION
 	elif ResearchManager.active_research_id != "":
 		player_state = PlayerState.RESEARCHING
+	elif not RefineryManager._queue.is_empty():
+		player_state = PlayerState.REFINING
 	else:
 		player_state = PlayerState.IDLE
 

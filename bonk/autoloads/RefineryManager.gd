@@ -15,8 +15,12 @@ func _process(delta: float) -> void:
 		entry.batches -= 1
 		if entry.batches <= 0:
 			_queue.pop_front()
+			if _queue.is_empty():
+				EventBus.refinement_queue_emptied.emit()
 
 func add_to_queue(recipe: RefinementRecipe, batches: int) -> void:
+	if not GameManager.is_player_free():
+		return
 	var possible := max_batchable(recipe)
 	var actual := mini(batches, possible)
 	if actual <= 0:

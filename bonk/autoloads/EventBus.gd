@@ -45,6 +45,7 @@ signal resources_burned(resource_id: String, quantity: int)
 # Refinement
 signal refinement_queued(recipe: RefinementRecipe, batches: int)
 signal refinement_completed(recipe: RefinementRecipe)
+signal refinement_queue_emptied()
 
 # Player state
 signal player_state_changed(state: int)
