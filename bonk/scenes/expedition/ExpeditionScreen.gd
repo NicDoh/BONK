@@ -305,7 +305,7 @@ func _refresh_player_hp() -> void:
 	_player_hp_label.text = "%d / %d HP" % [hp, max_hp]
 
 func _refresh_player_stats() -> void:
-	var dmg := CharacterManager.get_weapon_damage()
+	var dmg := CharacterManager.get_attack_damage()
 	var acc := CharacterManager.get_total_accuracy()
 	var def := CharacterManager.get_total_defense()
 	_player_stats_label.text = "DMG %d  ACC %d  DEF %d" % [dmg, acc, def]

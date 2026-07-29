@@ -14,7 +14,7 @@ enum DamageType { BLUNT, SLASH, PIERCE, FIRE, POISON, SPIRIT }
 @export var attack_interval: float = 2.0
 
 # All gear
-@export var defense: int = 0
+@export var armor: int = 0
 @export var bonus_hp: int = 0
 @export var speed_modifier: float = 0.0
 @export var accuracy_bonus: int = 0

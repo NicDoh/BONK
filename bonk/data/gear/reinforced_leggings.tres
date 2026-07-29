@@ -13,5 +13,5 @@ max_stack = 1
 tier = 0
 slot = 4
 bonus_hp = 1
-defense = 2
+armor = 2
 resistances = {"blunt": 0.05, "slash": 0.05, "pierce": 0.05}

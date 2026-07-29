@@ -3,6 +3,7 @@ extends Node
 const XP_PER_LEVEL_BASE: float = 100.0
 const XP_SCALING: float = 1.15
 const BARE_HANDS_DAMAGE: int = 1
+const BARE_SKIN_ARMOR: int = 1
 const BARE_HANDS_INTERVAL: float = 2.0
 
 var stats: Dictionary = {
@@ -60,17 +61,23 @@ func get_total_strength() -> int:
 		total += gear.strength_bonus
 	return maxi(0, total)
 
-func get_weapon_damage() -> int:
-	var weapon := get_equipped(GearData.Slot.WEAPON)
-	var base := weapon.damage if weapon else BARE_HANDS_DAMAGE
+func get_attack_damage() -> int:
+	var total_damage := 0
+	for gear in equipped.values():
+		total_damage += gear.damage
+	if total_damage == 0:
+		total_damage = BARE_HANDS_DAMAGE
 	var strength_power := 1.0 + 19.0 * pow(float(get_total_strength()) / 100.0, 0.65)
-	return roundi(strength_power * sqrt(float(base)))
+	return roundi(strength_power * sqrt(float(total_damage)))
 
 func get_total_defense() -> int:
-	var total := get_level("defense")
+	var total_armor := 0
 	for gear in equipped.values():
-		total += gear.defense
-	return maxi(0, total)
+		total_armor += gear.armor
+	if total_armor == 0:
+		total_armor = BARE_SKIN_ARMOR
+	var defense_power := 1.0 + 19.0 * pow(float(get_level("defense")) / 100.0, 0.65)
+	return roundi(defense_power * sqrt(float(total_armor)))
 
 func get_attack_interval() -> float:
 	var weapon := get_equipped(GearData.Slot.WEAPON)

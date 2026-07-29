@@ -12,5 +12,5 @@ stackable = false
 max_stack = 1
 tier = 0
 slot = 6
-defense = 1
+armor = 1
 resistances = {"blunt": 0.05, "slash": 0.05, "pierce": 0.05}

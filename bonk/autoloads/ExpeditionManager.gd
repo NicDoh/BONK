@@ -120,7 +120,7 @@ func _player_attack() -> void:
 		EventBus.player_missed.emit()
 		return
 
-	var base_damage := float(CharacterManager.get_weapon_damage())
+	var base_damage := float(CharacterManager.get_attack_damage())
 	var weapon := CharacterManager.get_equipped(GearData.Slot.WEAPON)
 	var damage_type := weapon.damage_type if weapon else GearData.DamageType.BLUNT
 
@@ -237,7 +237,7 @@ func apply_offline_progress(elapsed: float) -> Dictionary:
 
 	var accuracy    := float(CharacterManager.get_total_accuracy())
 	var defense     := float(current_monster.defense)
-	var base_damage := float(CharacterManager.get_weapon_damage()) * _get_damage_multiplier()
+	var base_damage := float(CharacterManager.get_attack_damage()) * _get_damage_multiplier()
 	var hit_ch      := _hit_chance(accuracy, defense)
 	var roll_exp    := ROLL_BASE / (1.0 + accuracy / ROLL_K)
 	var avg_roll    := 1.0 / (1.0 + roll_exp)

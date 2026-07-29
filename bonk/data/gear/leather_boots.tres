@@ -12,6 +12,6 @@ stackable = false
 max_stack = 1
 tier = 0
 slot = 5
-defense = 1
+armor = 1
 speed_modifier = -0.1
 resistances = {"blunt": 0.15, "slash": -0.1}

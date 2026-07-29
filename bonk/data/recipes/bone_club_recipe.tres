@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=7 format=3 uid="uid://drbcdvwp4bu07"]
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=8 format=3 uid="uid://drbcdvwp4bu07"]
 
 [ext_resource type="Script" uid="uid://dc4e8e5wbj6mj" path="res://resources/CraftingIngredient.gd" id="1_8vha4"]
 [ext_resource type="Script" uid="uid://mx61ai4t8bb8" path="res://resources/CraftingRecipe.gd" id="2_c6gii"]
 [ext_resource type="Resource" path="res://data/items/carved_bone.tres" id="3_cb"]
-[ext_resource type="Resource" path="res://data/items/hide.tres" id="4_hd"]
+[ext_resource type="ItemData" path="res://data/items/hide.tres" id="4_hd"]
 [ext_resource type="Resource" path="res://data/gear/bone_club.tres" id="5_v2j85"]
 
 [sub_resource type="Resource" id="Ing_carved_bone"]
@@ -14,7 +14,6 @@ quantity = 2
 [sub_resource type="Resource" id="Ing_hide"]
 script = ExtResource("1_8vha4")
 item = ExtResource("4_hd")
-quantity = 1
 
 [resource]
 script = ExtResource("2_c6gii")

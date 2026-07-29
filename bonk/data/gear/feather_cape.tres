@@ -12,5 +12,5 @@ stackable = false
 max_stack = 1
 tier = 0
 slot = 9
-defense = 1
+armor = 1
 resistances = {"poison": 0.1, "spirit": 0.15}

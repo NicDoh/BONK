@@ -13,5 +13,5 @@ max_stack = 1
 tier = 0
 slot = 2
 bonus_hp = 1
-defense = 1
+armor = 1
 resistances = {"blunt": -0.1, "poison": 0.1, "spirit": 0.15}

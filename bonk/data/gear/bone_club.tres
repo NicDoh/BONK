@@ -1,18 +1,12 @@
-[gd_resource type="Resource" script_class="GearData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="GearData" load_steps=2 format=3 uid="uid://cbr66wcugr6t8"]
 
-[ext_resource type="Script" path="res://resources/GearData.gd" id="1"]
+[ext_resource type="Script" uid="uid://dfvw14o318f27" path="res://resources/GearData.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
+damage = 5
 id = "bone_club"
 name = "Crude Club"
 description = "A rough club shaped from carved bone."
-rarity = 0
 stackable = false
 max_stack = 1
-tier = 0
-slot = 0
-two_handed = false
-damage_type = 0
-damage = 5
-attack_interval = 2.0
