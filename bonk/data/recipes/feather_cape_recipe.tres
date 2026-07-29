@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="CraftingRecipe" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://resources/CraftingIngredient.gd" id="1"]
+[ext_resource type="Script" path="res://resources/CraftingRecipe.gd" id="2"]
+[ext_resource type="Resource" path="res://data/items/feathers.tres" id="3"]
+[ext_resource type="Resource" path="res://data/items/thread.tres" id="4"]
+[ext_resource type="Resource" path="res://data/gear/feather_cape.tres" id="5"]
+
+[sub_resource type="Resource" id="Ing_feathers"]
+script = ExtResource("1")
+item = ExtResource("3")
+quantity = 15
+
+[sub_resource type="Resource" id="Ing_thread"]
+script = ExtResource("1")
+item = ExtResource("4")
+quantity = 3
+
+[resource]
+script = ExtResource("2")
+id = "feather_cape"
+result_item = ExtResource("5")
+ingredients = Array[ExtResource("1")]([SubResource("Ing_feathers"), SubResource("Ing_thread")])
+required_building_level = 0

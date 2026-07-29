@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="GearData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/GearData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "feather_cape"
+name = "Feather Cape"
+description = "A flowing cape of woven feathers. Light and ward against unseen forces."
+rarity = 0
+stackable = false
+max_stack = 1
+tier = 0
+slot = 9
+two_handed = false
+damage_type = 0
+bonus_hp = 0
+bonus_defense = 1
+bonus_strength = 0
+bonus_speed = 1
+bonus_accuracy = 0
+bonus_drop_chance = 0.0
+resistance_blunt = 0.0
+resistance_slash = 0.0
+resistance_pierce = 0.0
+resistance_fire = 0.0
+resistance_poison = 0.1
+resistance_spirit = 0.15
