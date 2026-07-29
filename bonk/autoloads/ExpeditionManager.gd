@@ -83,9 +83,6 @@ const CRIT_MULT   := 1.2
 const RED_MAX     := 0.90
 const RED_K       := 3.5
 const RED_P       := 1.5
-const ROLL_BASE   := 0.85
-const ROLL_K      := 25.0
-
 func _hit_chance(attacker_acc: float, defender_def: float) -> float:
 	if defender_def <= 0.0:
 		return 1.0
@@ -105,6 +102,9 @@ func _damage_reduction(defender_def: float, attacker_acc: float) -> float:
 	var r := defender_def / attacker_acc
 	var rp := pow(r, RED_P)
 	return RED_MAX * (rp / (RED_K + rp))
+
+const ROLL_BASE := 0.85
+const ROLL_K    := 25.0
 
 func _damage_roll(base: float, accuracy: float) -> int:
 	var exponent := ROLL_BASE / (1.0 + accuracy / ROLL_K)
