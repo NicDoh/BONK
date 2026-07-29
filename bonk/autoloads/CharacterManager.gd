@@ -2,7 +2,7 @@ extends Node
 
 const XP_PER_LEVEL_BASE: float = 100.0
 const XP_SCALING: float = 1.15
-const BARE_HANDS_DAMAGE: int = 2
+const BARE_HANDS_DAMAGE: int = 1
 const BARE_HANDS_INTERVAL: float = 2.0
 
 var stats: Dictionary = {
@@ -63,7 +63,8 @@ func get_total_strength() -> int:
 func get_weapon_damage() -> int:
 	var weapon := get_equipped(GearData.Slot.WEAPON)
 	var base := weapon.damage if weapon else BARE_HANDS_DAMAGE
-	return roundi(float(base) * (1.0 + float(get_total_strength()) / 100.0))
+	var strength_power := 1.0 + 19.0 * pow(float(get_total_strength()) / 100.0, 0.65)
+	return roundi(strength_power * sqrt(float(base)))
 
 func get_total_defense() -> int:
 	var total := get_level("defense")
