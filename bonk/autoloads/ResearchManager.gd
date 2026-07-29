@@ -16,6 +16,8 @@ func _process(_delta: float) -> void:
 func start(data: ResearchData) -> bool:
 	if active_research_id != "":
 		return false
+	if not GameManager.is_player_free():
+		return false
 	if is_completed(data.id):
 		return false
 	if not _prerequisites_met(data):

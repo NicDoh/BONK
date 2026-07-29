@@ -10,6 +10,8 @@ func can_craft(recipe: CraftingRecipe) -> bool:
 func craft(recipe: CraftingRecipe) -> bool:
 	if not can_craft(recipe):
 		return false
+	if not GameManager.is_player_free():
+		return false
 	for ingredient in recipe.ingredients:
 		InventoryManager.remove_item(ingredient.item, ingredient.quantity)
 	InventoryManager.add_item(recipe.result_item, recipe.result_quantity)

@@ -34,6 +34,8 @@ func _process(delta: float) -> void:
 func start(zone: ZoneData, mode: Mode = Mode.ROAM) -> void:
 	if active:
 		return
+	if not GameManager.is_player_free():
+		return
 	current_zone = zone
 	current_zone_id = zone.id
 	current_mode = mode
