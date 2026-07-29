@@ -39,6 +39,21 @@
 ### Bugfix
 - InventoryManager: `get_quantity`, `has_item` og `remove_item` håndterede ikke non-stackable items korrekt (brugte item.id som slot key, men non-stackable items gemmes med unik slot key). Alle tre funktioner itererer nu alle slots.
 
+## 2026-07-29 — Session 5 fortsat: Crude-tier armor komplettering
+
+### Crude-tier armor
+- Helmets: Bone Helm, Leather Hood, Feathered Hood (Poison/Spirit resistant, bruger Feathers)
+- Bodies: Leather Vest (tidl. Hide Vest), Bone Plate, Reinforced Hide
+- Legs: Bone Greaves, Leather Leggings, Reinforced Leggings
+- Boots: Bone Boots, Leather Boots (+1 SPD), Reinforced Boots (+1 SPD)
+- Gloves: Bone Gloves (+1 ACC), Leather Gloves (+1 ACC), Reinforced Gloves (+1 STR +1 ACC)
+- Shields: Bone Shield (+4 DEF, Pierce resistant), Hide Shield (+2 HP +2 DEF, Blunt resistant), Spiked Shield (+1 STR, bruger Spikes)
+- Cape: Feather Cape (+1 SPD, Poison/Spirit resistant, 15 Feathers + 3 Thread)
+
+### Design-beslutninger
+- Accessories (amulet, charm) passer ikke nødvendigvis i tier-systemet — overvejes som drops/quest-rewards
+- Cape er undtagelse: Feather Cape giver mening som craft da Feathers er common drop
+
 ## 2026-07-26 — Session 1: Projektstart
 - Koncept defineret: primitiv idle RPG, Runescape-inspireret, fokus på rare drops og collection logs
 - GDD oprettet, CLAUDE.md oprettet
